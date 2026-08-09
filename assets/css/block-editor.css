@@ -1,0 +1,20 @@
+/* ShareNivo - Block Editor Styles */
+
+.wp-block-sharenivo-share-buttons .sharenivo-total-shares {
+    margin-top: 0;
+}
+
+.wp-block-sharenivo-share-buttons .sharenivo-share-buttons {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: auto !important;
+    justify-content: flex-start;
+}
+
+.wp-block-sharenivo-share-buttons .sharenivo-button {
+    max-width: none !important;
+}

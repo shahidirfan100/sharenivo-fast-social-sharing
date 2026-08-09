@@ -1,0 +1,1381 @@
+/* ============================================================
+   ShareNivo - Modern Admin Dashboard Styles
+   Design: Calm indigo workspace with compact, accessible controls
+   Fonts: System UI stack (no remote requests)
+   ============================================================ */
+
+/* ── CSS Custom Properties ── */
+:root {
+	--sharenivo-primary: #6366f1;
+	--sharenivo-primary-dark: #4f46e5;
+	--sharenivo-primary-light: #8b5cf6;
+	--sharenivo-accent: #06b6d4;
+	--sharenivo-success: #10b981;
+	--sharenivo-warning: #f59e0b;
+	--sharenivo-danger: #ef4444;
+
+	--sharenivo-bg: #f8faff;
+	--sharenivo-surface: #ffffff;
+	--sharenivo-surface-2: #f1f5ff;
+	--sharenivo-border: #e2e8f0;
+	--sharenivo-border-focus: #6366f1;
+
+	--sharenivo-text: #1e293b;
+	--sharenivo-text-muted: #64748b;
+	--sharenivo-text-light: #94a3b8;
+
+	--sharenivo-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+	--sharenivo-shadow: 0 4px 16px rgba(99, 102, 241, 0.10), 0 1px 4px rgba(0, 0, 0, 0.06);
+	--sharenivo-shadow-lg: 0 12px 40px rgba(99, 102, 241, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
+
+	--sharenivo-radius: 12px;
+	--sharenivo-radius-sm: 8px;
+	--sharenivo-radius-xs: 6px;
+	--sharenivo-transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+
+	--sharenivo-gradient: linear-gradient(135deg, var(--sharenivo-primary) 0%, var(--sharenivo-primary-light) 100%);
+	--sharenivo-gradient-accent: linear-gradient(135deg, var(--sharenivo-accent) 0%, var(--sharenivo-primary) 100%);
+}
+
+/* ── Wrapper ── */
+.settings_page_sharenivo #wpcontent {
+	background: #f6f7fb;
+}
+
+.sharenivo-settings-wrap {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	max-width: 1080px;
+	margin: 0 auto;
+	padding: 0 0 40px;
+	color: var(--sharenivo-text);
+	background: transparent;
+}
+
+.sharenivo-settings-wrap,
+.sharenivo-settings-wrap * {
+	box-sizing: border-box;
+}
+
+/* ── Page Header ── */
+.sharenivo-page-header {
+	background: var(--sharenivo-gradient);
+	border-radius: var(--sharenivo-radius);
+	padding: 28px 36px;
+	margin: 20px 0 28px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	box-shadow: var(--sharenivo-shadow-lg);
+	position: relative;
+	overflow: hidden;
+}
+
+.sharenivo-page-header::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='30'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+	pointer-events: none;
+}
+
+.sharenivo-page-header::after {
+	content: '';
+	position: absolute;
+	right: -60px;
+	top: -60px;
+	width: 220px;
+	height: 220px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.08);
+	pointer-events: none;
+}
+
+.sharenivo-header-info {
+	position: relative;
+	z-index: 1;
+}
+
+.sharenivo-page-header h1 {
+	margin: 0 0 4px;
+	padding: 0;
+	font-size: 22px;
+	font-weight: 700;
+	color: #fff;
+	letter-spacing: -0.3px;
+	line-height: 1.3;
+}
+
+.sharenivo-header-subtitle {
+	margin: 0;
+	font-size: 13.5px;
+	color: rgba(255, 255, 255, 0.75);
+	font-weight: 400;
+}
+
+.sharenivo-header-badge {
+	position: relative;
+	z-index: 1;
+	background: rgba(255, 255, 255, 0.18);
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	border-radius: 100px;
+	padding: 6px 16px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #fff;
+	letter-spacing: 0.5px;
+	white-space: nowrap;
+	backdrop-filter: blur(6px);
+}
+
+/* ── Notice banner ── */
+.sharenivo-notice {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	background: #ecfdf5;
+	border: 1px solid #a7f3d0;
+	border-left: 4px solid var(--sharenivo-success);
+	border-radius: var(--sharenivo-radius-sm);
+	padding: 14px 18px;
+	margin-bottom: 22px;
+	font-size: 13.5px;
+	color: #065f46;
+	font-weight: 500;
+	animation: sspSlideDown 0.4s ease;
+}
+
+.sharenivo-notice p {
+	margin: 0;
+	padding: 0;
+}
+
+.sharenivo-notice.sharenivo-error {
+	background: #fef2f2;
+	border-color: #fecaca;
+	border-left-color: var(--sharenivo-danger);
+	color: #991b1b;
+}
+
+.sharenivo-notice svg {
+	flex-shrink: 0;
+}
+
+@keyframes sspSlideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Override WP notices on our page */
+.sharenivo-settings-wrap .notice,
+.sharenivo-settings-wrap .updated,
+.sharenivo-settings-wrap .error {
+	display: none !important;
+}
+
+/* ── Layout Shell ── */
+.sharenivo-layout {
+	display: grid;
+	grid-template-columns: 200px 1fr;
+	gap: 24px;
+	align-items: start;
+}
+
+/* ── Sidebar Navigation ── */
+.sharenivo-sidebar {
+	background: var(--sharenivo-surface);
+	border: 1px solid var(--sharenivo-border);
+	border-radius: var(--sharenivo-radius);
+	box-shadow: var(--sharenivo-shadow-sm);
+	overflow: hidden;
+	position: sticky;
+	top: 32px;
+}
+
+.sharenivo-sidebar-header {
+	padding: 14px 16px 12px;
+	font-size: 10px;
+	font-weight: 700;
+	color: var(--sharenivo-text-light);
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	border-bottom: 1px solid var(--sharenivo-border);
+	background: var(--sharenivo-surface-2);
+}
+
+.sharenivo-tab-nav {
+	display: flex;
+	flex-direction: column;
+	padding: 8px;
+	gap: 2px;
+	border-bottom: none;
+	margin-bottom: 0;
+}
+
+.sharenivo-tab-link {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	border-radius: var(--sharenivo-radius-xs);
+	font-size: 13.5px;
+	font-weight: 500;
+	color: var(--sharenivo-text-muted);
+	text-decoration: none;
+	transition: background var(--sharenivo-transition), color var(--sharenivo-transition), box-shadow var(--sharenivo-transition);
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	position: relative;
+	line-height: 1;
+	margin: 0;
+}
+
+.sharenivo-tab-link:hover {
+	background: var(--sharenivo-surface-2);
+	color: var(--sharenivo-text);
+	text-decoration: none;
+}
+
+.sharenivo-tab-link:focus-visible,
+.sharenivo-btn:focus-visible,
+.sharenivo-order-btn:focus-visible,
+.sharenivo-network-chip:focus-within {
+	outline: 2px solid var(--sharenivo-accent);
+	outline-offset: 2px;
+}
+
+.sharenivo-tab-link.active {
+	background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
+	color: var(--sharenivo-primary);
+	font-weight: 600;
+	box-shadow: none;
+	bottom: auto;
+	border-bottom: none;
+}
+
+.sharenivo-tab-link.active::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 20%;
+	bottom: 20%;
+	width: 3px;
+	border-radius: 0 4px 4px 0;
+	background: var(--sharenivo-gradient);
+}
+
+.sharenivo-tab-icon {
+	width: 18px;
+	height: 18px;
+	flex-shrink: 0;
+	opacity: 0.7;
+	transition: opacity var(--sharenivo-transition);
+}
+
+.sharenivo-tab-link.active .sharenivo-tab-icon,
+.sharenivo-tab-link:hover .sharenivo-tab-icon {
+	opacity: 1;
+}
+
+/* ── Main Content  ── */
+.sharenivo-main {
+	min-width: 0;
+}
+
+/* ── Tab Content Panels ── */
+.sharenivo-tab-content {
+	display: none;
+	background: var(--sharenivo-surface);
+	border: 1px solid var(--sharenivo-border);
+	border-radius: var(--sharenivo-radius);
+	box-shadow: var(--sharenivo-shadow);
+	overflow: hidden;
+	padding: 0;
+	animation: sspFadeIn 0.25s ease;
+}
+
+.sharenivo-tab-content.active {
+	display: block;
+}
+
+@keyframes sspFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* ── Panel Header ── */
+.sharenivo-panel-header {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 22px 28px;
+	border-bottom: 1px solid var(--sharenivo-border);
+	background: var(--sharenivo-surface-2);
+}
+
+.sharenivo-panel-icon {
+	width: 40px;
+	height: 40px;
+	border-radius: var(--sharenivo-radius-xs);
+	background: var(--sharenivo-gradient);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.sharenivo-panel-icon svg {
+	width: 20px;
+	height: 20px;
+	fill: #fff;
+}
+
+.sharenivo-panel-title {
+	margin: 0 0 2px;
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--sharenivo-text);
+	letter-spacing: -0.2px;
+	line-height: 1;
+}
+
+.sharenivo-panel-desc {
+	margin: 0;
+	font-size: 12.5px;
+	color: var(--sharenivo-text-muted);
+}
+
+/* Override the default h2 inside tab content */
+.sharenivo-tab-content h2 {
+	display: none;
+	/* replaced by sharenivo-panel-header */
+}
+
+/* ── Settings Grid ── */
+.sharenivo-panel-body {
+	padding: 24px 28px;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+/* ── Field Row ── */
+.sharenivo-field-row {
+	display: grid;
+	grid-template-columns: 210px 1fr;
+	gap: 12px 24px;
+	align-items: start;
+	padding: 18px 0;
+	border-bottom: 1px solid var(--sharenivo-border);
+	transition: background var(--sharenivo-transition);
+}
+
+.sharenivo-field-row:last-child {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.sharenivo-field-row:first-child {
+	padding-top: 0;
+}
+
+.sharenivo-field-label {
+	padding-top: 2px;
+}
+
+.sharenivo-label-text {
+	display: block;
+	font-size: 13.5px;
+	font-weight: 600;
+	color: var(--sharenivo-text);
+	margin-bottom: 3px;
+	line-height: 1.4;
+}
+
+.sharenivo-label-hint {
+	font-size: 12px;
+	color: var(--sharenivo-text-muted);
+	line-height: 1.5;
+}
+
+.sharenivo-field-control {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.sharenivo-description {
+	font-size: 12px;
+	color: var(--sharenivo-text-muted);
+	line-height: 1.55;
+	margin: 0;
+}
+
+/* ── Toggle Switch ── */
+.sharenivo-toggle-wrap {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.sharenivo-toggle {
+	position: relative;
+	width: 42px;
+	height: 24px;
+	flex-shrink: 0;
+}
+
+.sharenivo-toggle input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+	position: absolute;
+}
+
+.sharenivo-toggle-slider {
+	position: absolute;
+	inset: 0;
+	background: #cbd5e1;
+	border-radius: 100px;
+	transition: background var(--sharenivo-transition), box-shadow var(--sharenivo-transition);
+	cursor: pointer;
+}
+
+.sharenivo-toggle-slider::after {
+	content: '';
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	background: #fff;
+	border-radius: 50%;
+	left: 3px;
+	top: 3px;
+	transition: transform var(--sharenivo-transition);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sharenivo-toggle input:checked+.sharenivo-toggle-slider {
+	background: var(--sharenivo-gradient);
+	box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+}
+
+.sharenivo-toggle input:checked+.sharenivo-toggle-slider::after {
+	transform: translateX(18px);
+}
+
+.sharenivo-toggle input:focus-visible+.sharenivo-toggle-slider {
+	outline: 2px solid var(--sharenivo-primary);
+	outline-offset: 2px;
+}
+
+.sharenivo-toggle-label {
+	font-size: 13.5px;
+	color: var(--sharenivo-text);
+	cursor: pointer;
+	font-weight: 500;
+}
+
+/* ── Modern Select ── */
+.sharenivo-select {
+	appearance: none;
+	-webkit-appearance: none;
+	background: var(--sharenivo-surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;
+	border: 1.5px solid var(--sharenivo-border);
+	border-radius: var(--sharenivo-radius-xs);
+	padding: 9px 38px 9px 13px;
+	font-size: 13.5px;
+	font-family: inherit;
+	color: var(--sharenivo-text);
+	min-width: 200px;
+	transition: border-color var(--sharenivo-transition), box-shadow var(--sharenivo-transition);
+	cursor: pointer;
+	line-height: 1.4;
+}
+
+.sharenivo-select:hover {
+	border-color: #a5b4fc;
+}
+
+.sharenivo-select:focus {
+	outline: none;
+	border-color: var(--sharenivo-primary);
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* ── Modern Input ── */
+.sharenivo-input {
+	border: 1.5px solid var(--sharenivo-border);
+	border-radius: var(--sharenivo-radius-xs);
+	padding: 9px 13px;
+	font-size: 13.5px;
+	font-family: inherit;
+	color: var(--sharenivo-text);
+	transition: border-color var(--sharenivo-transition), box-shadow var(--sharenivo-transition);
+	background: var(--sharenivo-surface);
+	line-height: 1.4;
+}
+
+.sharenivo-input:hover {
+	border-color: #a5b4fc;
+}
+
+.sharenivo-input:focus {
+	outline: none;
+	border-color: var(--sharenivo-primary);
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.sharenivo-input-number {
+	width: 90px;
+}
+
+.sharenivo-input-text {
+	min-width: 220px;
+}
+
+.sharenivo-input-unit {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.sharenivo-unit {
+	font-size: 13px;
+	color: var(--sharenivo-text-muted);
+	font-weight: 500;
+}
+
+/* ── Textarea ── */
+.sharenivo-textarea {
+	border: 1.5px solid var(--sharenivo-border);
+	border-radius: var(--sharenivo-radius-xs);
+	padding: 10px 13px;
+	font-size: 13px;
+	font-family: 'Courier New', monospace;
+	color: var(--sharenivo-text);
+	transition: border-color var(--sharenivo-transition), box-shadow var(--sharenivo-transition);
+	background: #f8f9fc;
+	resize: vertical;
+	min-height: 140px;
+	width: 100%;
+	max-width: 540px;
+	line-height: 1.6;
+}
+
+.sharenivo-textarea:focus {
+	outline: none;
+	border-color: var(--sharenivo-primary);
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+	background: var(--sharenivo-surface);
+}
+
+/* ── Network Checkboxes (chip style) ── */
+.sharenivo-network-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.sharenivo-network-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding: 7px 13px;
+	border-radius: 100px;
+	border: 1.5px solid var(--sharenivo-border);
+	background: var(--sharenivo-surface);
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--sharenivo-text-muted);
+	cursor: pointer;
+	transition: all var(--sharenivo-transition);
+	user-select: none;
+	white-space: nowrap;
+}
+
+.sharenivo-network-chip input[type="checkbox"] {
+	display: none;
+}
+
+.sharenivo-network-chip:hover {
+	border-color: var(--sharenivo-primary);
+	color: var(--sharenivo-primary);
+	background: rgba(99, 102, 241, 0.05);
+}
+
+.sharenivo-network-chip.sharenivo-chip-active {
+	border-color: var(--sharenivo-primary);
+	background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
+	color: var(--sharenivo-primary);
+	font-weight: 600;
+}
+
+.sharenivo-chip-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--sharenivo-border);
+	transition: background var(--sharenivo-transition);
+	flex-shrink: 0;
+}
+
+.sharenivo-network-chip.sharenivo-chip-active .sharenivo-chip-dot {
+	background: var(--sharenivo-primary);
+}
+
+/* ── Network Order List ── */
+.sharenivo-network-order-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	max-width: 380px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.sharenivo-network-order-list li {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 14px;
+	border: 1.5px solid var(--sharenivo-border);
+	border-radius: var(--sharenivo-radius-xs);
+	background: var(--sharenivo-surface);
+	transition: border-color var(--sharenivo-transition), box-shadow var(--sharenivo-transition), transform var(--sharenivo-transition);
+	cursor: grab;
+}
+
+.sharenivo-network-order-list li:hover {
+	border-color: #a5b4fc;
+	box-shadow: var(--sharenivo-shadow-sm);
+}
+
+.sharenivo-order-drag {
+	color: var(--sharenivo-text-light);
+	cursor: grab;
+	line-height: 1;
+	font-size: 16px;
+	letter-spacing: -1px;
+	flex-shrink: 0;
+}
+
+.sharenivo-order-label {
+	flex: 1;
+	font-size: 13.5px;
+	font-weight: 500;
+	color: var(--sharenivo-text);
+}
+
+.sharenivo-order-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: var(--sharenivo-radius-xs);
+	border: 1.5px solid var(--sharenivo-border);
+	background: var(--sharenivo-surface-2);
+	color: var(--sharenivo-text-muted);
+	cursor: pointer;
+	transition: all var(--sharenivo-transition);
+	padding: 0;
+	line-height: 1;
+	font-size: 14px;
+}
+
+.sharenivo-order-btn:hover {
+	border-color: var(--sharenivo-primary);
+	background: rgba(99, 102, 241, 0.08);
+	color: var(--sharenivo-primary);
+}
+
+/* Remove WP default button styles on order buttons */
+.sharenivo-network-order-list .button,
+.sharenivo-network-order-list .button-small {
+	all: unset;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: var(--sharenivo-radius-xs);
+	border: 1.5px solid var(--sharenivo-border);
+	background: var(--sharenivo-surface-2);
+	color: var(--sharenivo-text-muted);
+	cursor: pointer;
+	transition: all var(--sharenivo-transition);
+	font-size: 14px;
+}
+
+.sharenivo-network-order-list .button:hover,
+.sharenivo-network-order-list .button-small:hover {
+	border-color: var(--sharenivo-primary);
+	background: rgba(99, 102, 241, 0.08);
+	color: var(--sharenivo-primary);
+}
+
+/* ── Color Picker Wrapper ── */
+.sharenivo-color-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.sharenivo-color-preview {
+	width: 32px;
+	height: 32px;
+	border-radius: var(--sharenivo-radius-xs);
+	border: 2px solid var(--sharenivo-border);
+	flex-shrink: 0;
+}
+
+.sharenivo-color-picker {
+	max-width: 120px;
+}
+
+/* WP color picker overrides */
+.wp-picker-container input[type=text].wp-color-picker {
+	border: 1.5px solid var(--sharenivo-border) !important;
+	border-radius: var(--sharenivo-radius-xs) !important;
+	font-family: inherit !important;
+	font-size: 13px !important;
+	padding: 7px 11px !important;
+}
+
+.wp-picker-container .wp-color-result.button {
+	border-radius: var(--sharenivo-radius-xs) !important;
+}
+
+/* ── Shortcode Badge ── */
+.sharenivo-shortcode-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+	color: #e2e8f0;
+	border-radius: var(--sharenivo-radius-xs);
+	padding: 8px 14px;
+	font-family: 'Courier New', monospace;
+	font-size: 13px;
+	letter-spacing: 0.3px;
+	box-shadow: var(--sharenivo-shadow-sm);
+}
+
+.sharenivo-shortcode-copy {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 5px;
+	background: rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	cursor: pointer;
+	transition: background var(--sharenivo-transition);
+	color: #94a3b8;
+}
+
+.sharenivo-shortcode-copy:hover {
+	background: rgba(99, 102, 241, 0.4);
+	color: #fff;
+}
+
+.sharenivo-shortcode-copied {
+	font-size: 11px;
+	color: var(--sharenivo-success);
+	font-family: inherit;
+	font-weight: 600;
+	opacity: 0;
+	transition: opacity 0.2s;
+}
+
+.sharenivo-shortcode-copied.visible {
+	opacity: 1;
+}
+
+/* ── Submit / Footer Bar ── */
+.sharenivo-form-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 20px 28px;
+	background: var(--sharenivo-surface-2);
+	border-top: 1px solid var(--sharenivo-border);
+	border-radius: 0 0 var(--sharenivo-radius) var(--sharenivo-radius);
+	flex-wrap: wrap;
+}
+
+.sharenivo-save-btn {
+	position: relative;
+	overflow: hidden;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 11px 28px;
+	background: var(--sharenivo-gradient);
+	color: #fff;
+	border: none;
+	border-radius: var(--sharenivo-radius-xs);
+	font-size: 14px;
+	font-weight: 600;
+	font-family: inherit;
+	cursor: pointer;
+	transition: opacity var(--sharenivo-transition), transform var(--sharenivo-transition), box-shadow var(--sharenivo-transition);
+	box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+	letter-spacing: 0.2px;
+	line-height: 1;
+}
+
+.sharenivo-save-btn:hover {
+	opacity: 0.92;
+	transform: translateY(-1px);
+	box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+}
+
+.sharenivo-save-btn:active {
+	transform: translateY(0);
+	box-shadow: 0 4px 10px rgba(99, 102, 241, 0.35);
+}
+
+.sharenivo-save-btn svg {
+	width: 16px;
+	height: 16px;
+	fill: currentColor;
+}
+
+.sharenivo-footer-note {
+	font-size: 12.5px;
+	color: var(--sharenivo-text-muted);
+	margin: 0;
+}
+
+/* ── Info Callout ── */
+.sharenivo-callout {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	background: rgba(99, 102, 241, 0.07);
+	border: 1.5px solid rgba(99, 102, 241, 0.2);
+	border-radius: var(--sharenivo-radius-xs);
+	padding: 12px 15px;
+	font-size: 12.5px;
+	color: var(--sharenivo-primary-dark);
+	line-height: 1.55;
+}
+
+.sharenivo-callout svg {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	margin-top: 1px;
+	fill: var(--sharenivo-primary);
+}
+
+/* ── Pill Badge ── */
+.sharenivo-pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 9px;
+	border-radius: 100px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.4px;
+}
+
+.sharenivo-pill-optional {
+	background: rgba(100, 116, 139, 0.12);
+	color: var(--sharenivo-text-muted);
+}
+
+/* ── Old WP form-table – hide / reset on our page ── */
+.sharenivo-settings-wrap .form-table {
+	display: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+	.sharenivo-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.sharenivo-sidebar {
+		position: static;
+	}
+
+	.sharenivo-tab-nav {
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+
+	.sharenivo-tab-link.active::before {
+		display: none;
+	}
+
+	.sharenivo-tab-link {
+		padding: 8px 12px;
+		font-size: 13px;
+	}
+}
+
+@media (max-width: 600px) {
+	.sharenivo-page-header {
+		flex-direction: column;
+		align-items: flex-start;
+		padding: 20px 20px;
+	}
+
+	.sharenivo-field-row {
+		grid-template-columns: 1fr;
+		gap: 8px;
+	}
+
+	.sharenivo-panel-body {
+		padding: 18px 18px;
+	}
+
+	.sharenivo-form-footer {
+		padding: 16px 18px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sharenivo-settings-wrap *,
+	.sharenivo-settings-wrap *::before,
+	.sharenivo-settings-wrap *::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+/* ─────────────────────────────────────────────────────────────
+   ShareNivo workspace refresh
+   An original editorial control-room treatment: midnight ink,
+   electric indigo and a warm coral signal accent.
+   ───────────────────────────────────────────────────────────── */
+:root {
+	--sharenivo-primary: #635bff;
+	--sharenivo-primary-dark: #4b45d6;
+	--sharenivo-primary-light: #8a84ff;
+	--sharenivo-accent: #ff7a66;
+	--sharenivo-success: #1aa179;
+	--sharenivo-warning: #c98219;
+	--sharenivo-danger: #d94f62;
+	--sharenivo-bg: #f5f6fb;
+	--sharenivo-surface: #ffffff;
+	--sharenivo-surface-2: #f7f7ff;
+	--sharenivo-border: #e5e7f0;
+	--sharenivo-border-focus: #635bff;
+	--sharenivo-text: #171a2d;
+	--sharenivo-text-muted: #6d7286;
+	--sharenivo-text-light: #9da2b4;
+	--sharenivo-shadow-sm: 0 2px 8px rgba(20, 24, 52, 0.05);
+	--sharenivo-shadow: 0 12px 32px rgba(20, 24, 52, 0.07), 0 2px 6px rgba(20, 24, 52, 0.04);
+	--sharenivo-shadow-lg: 0 20px 48px rgba(16, 21, 43, 0.18), 0 4px 12px rgba(16, 21, 43, 0.08);
+	--sharenivo-radius: 18px;
+	--sharenivo-radius-sm: 12px;
+	--sharenivo-radius-xs: 9px;
+	--sharenivo-transition: 0.18s ease;
+	--sharenivo-gradient: linear-gradient(135deg, #635bff 0%, #827bff 100%);
+	--sharenivo-gradient-accent: linear-gradient(135deg, #ff7a66 0%, #ff9a72 100%);
+}
+
+.settings_page_sharenivo #wpcontent {
+	background: var(--sharenivo-bg);
+}
+
+.sharenivo-settings-wrap {
+	max-width: 1180px;
+	padding-bottom: 56px;
+	color: var(--sharenivo-text);
+}
+
+.sharenivo-page-header {
+	min-height: 128px;
+	margin: 22px 0 28px;
+	padding: 28px 34px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 20px;
+	background: #10152b;
+	box-shadow: var(--sharenivo-shadow-lg);
+}
+
+.sharenivo-page-header::before {
+	background: radial-gradient(circle at 80% 20%, rgba(99, 91, 255, 0.42), transparent 34%), radial-gradient(circle at 15% 110%, rgba(255, 122, 102, 0.2), transparent 32%);
+	opacity: 1;
+}
+
+.sharenivo-page-header::after {
+	right: -74px;
+	top: -104px;
+	width: 260px;
+	height: 260px;
+	background: rgba(255, 122, 102, 0.13);
+}
+
+.sharenivo-header-info::before {
+	content: 'SN';
+	position: absolute;
+	left: 0;
+	top: 1px;
+	display: grid;
+	width: 38px;
+	height: 38px;
+	place-items: center;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	border-radius: 11px;
+	background: linear-gradient(145deg, #756eff, #ff7a66);
+	box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+}
+
+.sharenivo-header-info {
+	padding-left: 52px;
+}
+
+.sharenivo-page-header h1 {
+	font-size: 24px;
+	letter-spacing: -0.5px;
+}
+
+.sharenivo-header-subtitle {
+	max-width: 560px;
+	font-size: 13px;
+	color: rgba(255, 255, 255, 0.68);
+}
+
+.sharenivo-header-badge {
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	background: rgba(255, 255, 255, 0.1);
+	padding: 8px 14px;
+	font-size: 11px;
+	letter-spacing: 0.6px;
+}
+
+.sharenivo-layout {
+	grid-template-columns: 224px minmax(0, 1fr);
+	gap: 28px;
+}
+
+.sharenivo-sidebar {
+	top: 24px;
+	border: 1px solid var(--sharenivo-border);
+	border-radius: 16px;
+	box-shadow: var(--sharenivo-shadow-sm);
+}
+
+.sharenivo-sidebar-header {
+	padding: 18px 17px 11px;
+	border-bottom: 0;
+	background: var(--sharenivo-surface);
+	color: var(--sharenivo-text-light);
+	font-size: 10px;
+	letter-spacing: 1.25px;
+}
+
+.sharenivo-tab-nav {
+	padding: 4px 10px 12px;
+	gap: 4px;
+}
+
+.sharenivo-tab-link {
+	min-height: 42px;
+	padding: 11px 12px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	font-size: 13px;
+	color: #74798d;
+}
+
+.sharenivo-tab-link:hover {
+	background: #f5f5ff;
+	color: var(--sharenivo-text);
+}
+
+.sharenivo-tab-link.active {
+	border-color: rgba(99, 91, 255, 0.14);
+	background: #f0efff;
+	color: var(--sharenivo-primary-dark);
+	box-shadow: none;
+}
+
+.sharenivo-tab-link.active::before {
+	left: 5px;
+	width: 3px;
+	background: var(--sharenivo-gradient-accent);
+}
+
+.sharenivo-tab-icon {
+	width: 17px;
+	height: 17px;
+}
+
+.sharenivo-tab-content {
+	border: 1px solid var(--sharenivo-border);
+	border-radius: 18px;
+	box-shadow: var(--sharenivo-shadow);
+}
+
+.sharenivo-panel-header {
+	padding: 26px 30px 23px;
+	background: #fff;
+}
+
+.sharenivo-panel-icon {
+	width: 44px;
+	height: 44px;
+	border-radius: 12px;
+	background: #eeedff;
+	box-shadow: none;
+}
+
+.sharenivo-panel-icon svg {
+	width: 21px;
+	height: 21px;
+	stroke: var(--sharenivo-primary-dark);
+}
+
+.sharenivo-panel-title {
+	font-size: 16px;
+	letter-spacing: -0.25px;
+}
+
+.sharenivo-panel-desc {
+	font-size: 12.5px;
+	color: var(--sharenivo-text-muted);
+}
+
+.sharenivo-panel-body {
+	padding: 8px 30px 28px;
+}
+
+.sharenivo-field-row {
+	grid-template-columns: minmax(170px, 0.65fr) minmax(0, 1.35fr);
+	gap: 16px 34px;
+	padding: 21px 0;
+	border-bottom-color: #ececf3;
+}
+
+.sharenivo-label-text {
+	font-size: 13px;
+	letter-spacing: -0.05px;
+}
+
+.sharenivo-label-hint,
+.sharenivo-description {
+	font-size: 11.5px;
+	color: #808599;
+	line-height: 1.55;
+}
+
+.sharenivo-toggle-slider {
+	background: #d9dbe5;
+}
+
+.sharenivo-toggle input:checked + .sharenivo-toggle-slider {
+	background: var(--sharenivo-gradient);
+	box-shadow: 0 4px 10px rgba(99, 91, 255, 0.28);
+}
+
+.sharenivo-select,
+.sharenivo-input,
+.sharenivo-textarea {
+	border: 1px solid #dfe1eb;
+	border-radius: 10px;
+	background-color: #fff;
+	box-shadow: 0 1px 1px rgba(20, 24, 52, 0.02);
+}
+
+.sharenivo-select:hover,
+.sharenivo-input:hover,
+.sharenivo-textarea:hover {
+	border-color: #b9b7ef;
+}
+
+.sharenivo-select:focus,
+.sharenivo-input:focus,
+.sharenivo-textarea:focus {
+	border-color: var(--sharenivo-primary);
+	box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.13);
+}
+
+.sharenivo-network-chip {
+	padding: 8px 12px;
+	border: 1px solid #e0e2ec;
+	border-radius: 10px;
+	background: #fff;
+	font-size: 12.5px;
+}
+
+.sharenivo-network-chip:hover {
+	border-color: #aaa5ff;
+	background: #fafaff;
+	color: var(--sharenivo-primary-dark);
+}
+
+.sharenivo-network-chip.sharenivo-chip-active {
+	border-color: rgba(99, 91, 255, 0.32);
+	background: #f0efff;
+	color: var(--sharenivo-primary-dark);
+}
+
+.sharenivo-chip-dot {
+	width: 7px;
+	height: 7px;
+}
+
+.sharenivo-network-chip.sharenivo-chip-active .sharenivo-chip-dot {
+	background: var(--sharenivo-accent);
+	box-shadow: 0 0 0 3px rgba(255, 122, 102, 0.14);
+}
+
+.sharenivo-network-order-list li {
+	padding: 9px 12px;
+	border: 1px solid #e0e2ec;
+	border-radius: 10px;
+}
+
+.sharenivo-network-order-list li:hover {
+	border-color: #b9b7ef;
+	box-shadow: var(--sharenivo-shadow-sm);
+}
+
+.sharenivo-order-btn,
+.sharenivo-network-order-list .button,
+.sharenivo-network-order-list .button-small {
+	border: 1px solid #e0e2ec;
+	border-radius: 8px;
+	background: #f8f8fc;
+}
+
+.sharenivo-order-btn:hover,
+.sharenivo-network-order-list .button:hover,
+.sharenivo-network-order-list .button-small:hover {
+	border-color: var(--sharenivo-primary);
+	background: #f0efff;
+	color: var(--sharenivo-primary-dark);
+}
+
+.sharenivo-shortcode-badge {
+	border-radius: 10px;
+	background: #171a2d;
+	box-shadow: 0 6px 14px rgba(16, 21, 43, 0.14);
+}
+
+.sharenivo-shortcode-copy {
+	border-radius: 9px;
+	background: var(--sharenivo-gradient);
+}
+
+.sharenivo-shortcode-copy:hover,
+.sharenivo-save-btn:hover {
+	background: var(--sharenivo-primary-dark);
+}
+
+.sharenivo-form-footer {
+	margin-top: 16px;
+	padding: 18px 22px;
+	border: 1px solid var(--sharenivo-border);
+	border-radius: 15px;
+	background: #fff;
+	box-shadow: var(--sharenivo-shadow-sm);
+}
+
+.sharenivo-save-btn {
+	border: 0;
+	border-radius: 10px;
+	background: var(--sharenivo-primary);
+	box-shadow: 0 7px 16px rgba(99, 91, 255, 0.24);
+}
+
+.sharenivo-save-btn:active {
+	transform: translateY(1px);
+	box-shadow: 0 3px 8px rgba(99, 91, 255, 0.22);
+}
+
+.sharenivo-footer-note {
+	color: #85899b;
+	font-size: 11.5px;
+}
+
+.sharenivo-callout {
+	border: 1px solid #ffd8d1;
+	border-left: 3px solid var(--sharenivo-accent);
+	border-radius: 10px;
+	background: #fff8f6;
+}
+
+@media (max-width: 900px) {
+	.sharenivo-page-header {
+		padding: 24px;
+	}
+
+	.sharenivo-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.sharenivo-sidebar {
+		position: static;
+	}
+
+	.sharenivo-tab-nav {
+		flex-direction: row;
+		overflow-x: auto;
+	}
+
+	.sharenivo-tab-link {
+		flex: 0 0 auto;
+	}
+}
+
+@media (max-width: 600px) {
+	.sharenivo-page-header {
+		align-items: flex-start;
+		flex-direction: column;
+		gap: 16px;
+		margin-top: 12px;
+	}
+
+	.sharenivo-header-info {
+		padding-left: 48px;
+	}
+
+	.sharenivo-panel-header,
+	.sharenivo-panel-body {
+		padding-right: 18px;
+		padding-left: 18px;
+	}
+
+	.sharenivo-field-row {
+		grid-template-columns: 1fr;
+		gap: 10px;
+	}
+
+	.sharenivo-form-footer {
+		align-items: stretch;
+		flex-direction: column;
+	}
+}

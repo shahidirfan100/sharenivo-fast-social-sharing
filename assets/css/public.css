@@ -1,0 +1,483 @@
+/* ShareNivo - Public Styles */
+
+/* Base Button Styles */
+.sharenivo-share-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sharenivo-gap, 10px);
+    z-index: 9999;
+}
+
+.sharenivo-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    overflow: visible;
+    position: relative;
+    cursor: pointer;
+}
+
+.sharenivo-button svg {
+    fill: #fff;
+    transition: transform 0.3s ease, fill 0.3s ease;
+    pointer-events: none;
+}
+
+.sharenivo-total-shares {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    padding: 6px 10px;
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #222;
+}
+
+.sharenivo-total-shares-value {
+    color: #0073aa;
+}
+
+.sharenivo-network-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #111;
+    color: #fff;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 700;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* Button Sizes */
+.sharenivo-size-small {
+    width: 40px;
+    height: 40px;
+}
+
+.sharenivo-size-small svg {
+    width: 20px;
+    height: 20px;
+}
+
+.sharenivo-size-medium {
+    width: 50px;
+    height: 50px;
+}
+
+.sharenivo-size-medium svg {
+    width: 24px;
+    height: 24px;
+}
+
+.sharenivo-size-large {
+    width: 60px;
+    height: 60px;
+}
+
+.sharenivo-size-large svg {
+    width: 28px;
+    height: 28px;
+}
+
+/* Button Shapes */
+.sharenivo-shape-circle {
+    border-radius: 50%;
+}
+
+.sharenivo-shape-square {
+    border-radius: 0;
+}
+
+.sharenivo-shape-rounded {
+    border-radius: 10px;
+}
+
+.sharenivo-share-buttons .sharenivo-button.sharenivo-shape-landscape,
+.sharenivo-share-buttons .sharenivo-button.sharenivo-shape-portrait {
+    border-radius: 10px;
+}
+
+.sharenivo-share-buttons .sharenivo-button.sharenivo-shape-landscape.sharenivo-size-small,
+.sharenivo-share-buttons .sharenivo-button.sharenivo-shape-portrait.sharenivo-size-small {
+    width: 58px;
+    height: 34px;
+}
+
+.sharenivo-share-buttons .sharenivo-button.sharenivo-shape-landscape.sharenivo-size-medium,
+.sharenivo-share-buttons .sharenivo-button.sharenivo-shape-portrait.sharenivo-size-medium {
+    width: 72px;
+    height: 42px;
+}
+
+.sharenivo-share-buttons .sharenivo-button.sharenivo-shape-landscape.sharenivo-size-large,
+.sharenivo-share-buttons .sharenivo-button.sharenivo-shape-portrait.sharenivo-size-large {
+    width: 86px;
+    height: 50px;
+}
+
+/* Brand Colors */
+.sharenivo-button.sharenivo-facebook {
+    background: linear-gradient(135deg, #1877f2, #0d5dbf);
+}
+
+.sharenivo-button.sharenivo-x {
+    background: linear-gradient(135deg, #000000, #434343);
+}
+
+.sharenivo-button.sharenivo-linkedin {
+    background: linear-gradient(135deg, #0a66c2, #004182);
+}
+
+.sharenivo-button.sharenivo-whatsapp {
+    background: linear-gradient(135deg, #25d366, #1da851);
+}
+
+.sharenivo-button.sharenivo-pinterest {
+    background: linear-gradient(135deg, #e60023, #bd001c);
+}
+
+.sharenivo-button.sharenivo-threads {
+    background: linear-gradient(135deg, #111111, #2a2a2a);
+}
+
+.sharenivo-button.sharenivo-bluesky {
+    background: linear-gradient(135deg, #1185fe, #0a5fb8);
+}
+
+.sharenivo-button.sharenivo-telegram {
+    background: linear-gradient(135deg, #2aabee, #157bb0);
+}
+
+.sharenivo-button.sharenivo-reddit {
+    background: linear-gradient(135deg, #ff4500, #d63a00);
+}
+
+.sharenivo-button.sharenivo-email {
+    background: linear-gradient(135deg, #7d7d7d, #5a5a5a);
+}
+
+.sharenivo-button.sharenivo-more-toggle {
+    background: linear-gradient(135deg, #383838, #171717);
+    border: 0;
+    color: #fff;
+    min-height: 0;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.22);
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    max-width: none;
+    flex: 0 0 auto;
+}
+
+.sharenivo-more-toggle .sharenivo-more-text {
+    display: inline-block;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.sharenivo-share-buttons .sharenivo-more-toggle.sharenivo-size-small {
+    width: 40px !important;
+    height: 20px !important;
+}
+
+.sharenivo-share-buttons .sharenivo-more-toggle.sharenivo-size-medium {
+    width: 50px !important;
+    height: 25px !important;
+}
+
+.sharenivo-share-buttons .sharenivo-more-toggle.sharenivo-size-large {
+    width: 60px !important;
+    height: 30px !important;
+}
+
+.sharenivo-share-buttons .sharenivo-more-toggle.sharenivo-shape-landscape.sharenivo-size-small,
+.sharenivo-share-buttons .sharenivo-more-toggle.sharenivo-shape-portrait.sharenivo-size-small {
+    width: 58px !important;
+    height: 18px !important;
+}
+
+.sharenivo-share-buttons .sharenivo-more-toggle.sharenivo-shape-landscape.sharenivo-size-medium,
+.sharenivo-share-buttons .sharenivo-more-toggle.sharenivo-shape-portrait.sharenivo-size-medium {
+    width: 72px !important;
+    height: 21px !important;
+}
+
+.sharenivo-share-buttons .sharenivo-more-toggle.sharenivo-shape-landscape.sharenivo-size-large,
+.sharenivo-share-buttons .sharenivo-more-toggle.sharenivo-shape-portrait.sharenivo-size-large {
+    width: 86px !important;
+    height: 25px !important;
+}
+
+.sharenivo-more-toggle svg {
+    width: 11px;
+    height: 11px;
+    transition: transform 0.25s ease;
+}
+
+.sharenivo-more-toggle.sharenivo-size-small .sharenivo-more-text {
+    font-size: 9px;
+}
+
+.sharenivo-more-toggle.sharenivo-size-medium .sharenivo-more-text {
+    font-size: 10px;
+}
+
+.sharenivo-more-toggle.sharenivo-size-large .sharenivo-more-text {
+    font-size: 11px;
+}
+
+.sharenivo-more-toggle.is-open svg {
+    transform: rotate(45deg);
+}
+
+.sharenivo-more-networks {
+    display: none;
+    width: 100%;
+    gap: var(--sharenivo-gap, 10px);
+}
+
+.sharenivo-more-wrap {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    margin-top: var(--sharenivo-gap, 10px);
+    gap: var(--sharenivo-gap, 10px);
+}
+
+.sharenivo-more-networks.is-open {
+    display: flex;
+}
+
+.sharenivo-floating-left .sharenivo-more-wrap,
+.sharenivo-floating-right .sharenivo-more-wrap {
+    width: auto;
+}
+
+.sharenivo-floating-left .sharenivo-more-networks,
+.sharenivo-floating-right .sharenivo-more-networks {
+    flex-direction: column;
+}
+
+.sharenivo-inline-top .sharenivo-more-networks,
+.sharenivo-inline-bottom .sharenivo-more-networks,
+.sharenivo-mobile-inline .sharenivo-more-networks {
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: var(--sharenivo-gap, 10px);
+}
+
+/* Hover Animations (only if animations enabled) */
+body:not(.sharenivo-no-animations) .sharenivo-share-buttons.sharenivo-anim-lift .sharenivo-button:hover {
+    transform: translateY(-5px) scale(1.08);
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.28);
+}
+
+body:not(.sharenivo-no-animations) .sharenivo-share-buttons.sharenivo-anim-lift .sharenivo-button:hover svg {
+    transform: scale(1.18);
+}
+
+@keyframes sharenivoPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.12);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+body:not(.sharenivo-no-animations) .sharenivo-share-buttons.sharenivo-anim-pulse .sharenivo-button:hover {
+    animation: sharenivoPulse 0.45s ease-in-out;
+    box-shadow: 0 7px 12px rgba(0, 0, 0, 0.25);
+}
+
+body:not(.sharenivo-no-animations) .sharenivo-share-buttons.sharenivo-anim-spin .sharenivo-button:hover svg {
+    transform: rotate(180deg);
+}
+
+body:not(.sharenivo-no-animations) .sharenivo-share-buttons.sharenivo-anim-spin .sharenivo-button:hover {
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes sharenivoBounce {
+    0% {
+        transform: translateY(0);
+    }
+    35% {
+        transform: translateY(-7px);
+    }
+    70% {
+        transform: translateY(-2px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+body:not(.sharenivo-no-animations) .sharenivo-share-buttons.sharenivo-anim-bounce .sharenivo-button:hover {
+    animation: sharenivoBounce 0.5s ease;
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25);
+}
+
+body:not(.sharenivo-no-animations) .sharenivo-share-buttons.sharenivo-anim-flip .sharenivo-button:hover {
+    transform: perspective(500px) rotateY(14deg) scale(1.05);
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.26);
+}
+
+/* Desktop Positions */
+@media (min-width: 768px) {
+
+    /* Floating Left */
+    .sharenivo-floating-left {
+        position: fixed;
+        top: 50%;
+        left: 20px;
+        transform: translateY(-50%);
+        flex-direction: column;
+        gap: var(--sharenivo-gap, 10px);
+    }
+
+    /* Floating Right */
+    .sharenivo-floating-right {
+        position: fixed;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+        flex-direction: column;
+        gap: var(--sharenivo-gap, 10px);
+    }
+
+    /* Inline Top */
+    .sharenivo-inline-top {
+        justify-content: center;
+        gap: var(--sharenivo-gap, 10px);
+        margin-top: var(--sharenivo-margin-top, 20px);
+        margin-bottom: var(--sharenivo-margin-bottom, 20px);
+    }
+
+    /* Inline Bottom */
+    .sharenivo-inline-bottom {
+        justify-content: center;
+        gap: var(--sharenivo-gap, 10px);
+        margin-top: var(--sharenivo-margin-top, 20px);
+        margin-bottom: var(--sharenivo-margin-bottom, 20px);
+    }
+
+    /* Hide mobile-only positions on desktop */
+    .sharenivo-mobile-sticky-bottom.sharenivo-floating-left,
+    .sharenivo-mobile-sticky-bottom.sharenivo-floating-right {
+        display: flex;
+    }
+}
+
+/* Mobile Styles */
+@media (max-width: 767px) {
+
+    .sharenivo-mobile-sticky-bottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        display: flex;
+        justify-content: space-evenly;
+        padding: 8px;
+        border-top: 1px solid #ccc;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        gap: var(--sharenivo-gap, 8px);
+        z-index: 100000;
+    }
+
+    .sharenivo-mobile-sticky-bottom .sharenivo-button {
+        flex: 1;
+        max-width: 60px;
+    }
+
+    .sharenivo-mobile-sticky-bottom .sharenivo-more-toggle {
+        flex: 0 0 auto;
+        max-width: none;
+    }
+
+    .sharenivo-mobile-sticky-bottom .sharenivo-more-networks {
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: calc(100% + 8px);
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
+        z-index: 100001;
+    }
+
+    /* Mobile Inline */
+    .sharenivo-mobile-inline.sharenivo-inline-top,
+    .sharenivo-mobile-inline.sharenivo-inline-bottom {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: var(--sharenivo-gap, 10px);
+        margin-top: var(--sharenivo-margin-top, 20px);
+        margin-bottom: var(--sharenivo-margin-bottom, 20px);
+    }
+
+    .sharenivo-mobile-inline.sharenivo-floating-left,
+    .sharenivo-mobile-inline.sharenivo-floating-right {
+        position: static;
+        transform: none;
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: var(--sharenivo-gap, 10px);
+        margin-top: var(--sharenivo-margin-top, 20px);
+        margin-bottom: var(--sharenivo-margin-bottom, 20px);
+    }
+
+    /* Hidden on Mobile */
+    .sharenivo-mobile-hidden {
+        display: none !important;
+    }
+}
+
+/* Accessibility */
+.sharenivo-button:focus {
+    outline: 2px solid #0073aa;
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .sharenivo-share-buttons,
+    .sharenivo-total-shares {
+        display: none !important;
+    }
+}

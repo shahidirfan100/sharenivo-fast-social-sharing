@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">ShareNivo</title>
+  <desc id="desc">Three connected sharing nodes in the ShareNivo plum and coral color system.</desc>
+  <rect width="256" height="256" rx="48" fill="#2d1838"/>
+  <circle cx="128" cy="128" r="108" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="2"/>
+  <circle cx="128" cy="128" r="84" fill="none" stroke="#fff" stroke-opacity=".1" stroke-width="2"/>
+  <rect x="42" y="42" width="172" height="172" rx="46" fill="#ee5143"/>
+  <path d="M80 101 166 85M80 101l84 84" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="80" cy="101" r="18" fill="#fff"/>
+  <circle cx="166" cy="85" r="15" fill="#fff"/>
+  <circle cx="164" cy="185" r="21" fill="#fff"/>
+</svg>

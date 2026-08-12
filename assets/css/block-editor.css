@@ -1,20 +1,19 @@
-/* ShareNivo - Block Editor Styles */
-
-.wp-block-sharenivo-share-buttons .sharenivo-total-shares {
-    margin-top: 0;
+.sharenivo-block-preview {
+	min-height: 74px;
+	padding: 18px;
+	border: 1px dashed #b8b4f4;
+	border-radius: 12px;
+	background: #faf9ff;
 }
 
-.wp-block-sharenivo-share-buttons .sharenivo-share-buttons {
-    position: static !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
-    transform: none !important;
-    width: auto !important;
-    justify-content: flex-start;
+.editor-styles-wrapper .sharenivo-share--inline,
+.editor-styles-wrapper .sharenivo-follow {
+	margin: 0;
 }
 
-.wp-block-sharenivo-share-buttons .sharenivo-button {
-    max-width: none !important;
+.editor-styles-wrapper .sharenivo-share--floating,
+.editor-styles-wrapper .sharenivo-share--sticky {
+	position: static;
+	display: block;
+	transform: none;
 }

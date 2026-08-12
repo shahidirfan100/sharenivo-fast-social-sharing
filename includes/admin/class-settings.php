@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings page functionality.
+ * Settings storage, migration, validation, and admin screen.
  *
  * @package ShareNivo
  */
@@ -12,78 +12,224 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Settings class.
+ * ShareNivo settings manager.
  */
 class Settings {
 
 	/**
-	 * Get default plugin settings.
+	 * Get the version 2 defaults.
 	 *
 	 * @return array
 	 */
-	private static function get_default_settings() {
-		$default_networks = array( 'facebook', 'x', 'linkedin', 'whatsapp', 'pinterest', 'threads', 'bluesky', 'telegram', 'reddit', 'email' );
+	public static function get_defaults() {
+		$networks = array( 'facebook', 'x', 'linkedin', 'whatsapp', 'pinterest', 'threads', 'bluesky', 'telegram', 'reddit', 'email', 'copy' );
 
 		return array(
-			'enabled'            => true,
-			'networks'           => $default_networks,
-			'network_order'      => $default_networks,
-			'post_types'         => array( 'post', 'page' ),
-			'show_on_homepage'   => false,
-			'auto_detect_post_types' => true,
-			'position'           => 'floating_left',
-			'mobile_position'    => 'sticky_bottom',
-			'button_shape'       => 'circle',
-			'button_size'        => 'medium',
-			'show_more_network_button' => true,
-			'color_scheme'       => 'brand',
-			'hover_animation'    => 'lift',
-			'custom_bg_color'    => '#000000',
-			'custom_icon_color'  => '#ffffff',
-			'custom_hover_bg'    => '#434343',
-			'button_gap'         => 10,
-			'margin_top'         => 20,
-			'margin_bottom'      => 20,
-			'enable_animations'  => true,
-			'show_share_counts'  => false,
-			'share_count_mode'   => 'total',
-			'share_count_cache_ttl' => 60,
-			'sharedcount_api_key' => '',
-			'custom_css'         => '',
-			'inline_alignment'   => 'left',
+			'schema_version'   => 2,
+			'enabled'          => true,
+			'networks'         => $networks,
+			'network_order'    => $networks,
+			'post_types'       => array( 'post', 'page' ),
+			'show_on_homepage' => false,
+			'locations'        => array(
+				'floating' => array(
+					'enabled'     => true,
+					'side'        => 'left',
+					'vertical'    => 50,
+					'hide_mobile' => true,
+				),
+				'inline'   => array(
+					'enabled'   => false,
+					'position'  => 'bottom',
+					'alignment' => 'left',
+				),
+				'sticky'   => array(
+					'enabled'   => true,
+					'width'     => 'compact',
+					'alignment' => 'center',
+				),
+				'popup'    => array(
+					'enabled'       => false,
+					'title'         => 'Enjoyed this article?',
+					'message'       => 'Share it with your network.',
+					'trigger'       => 'scroll',
+					'trigger_value' => 70,
+					'frequency'     => 'session',
+				),
+				'flyin'    => array(
+					'enabled'       => false,
+					'side'          => 'right',
+					'title'         => 'Worth sharing?',
+					'message'       => 'Help others discover this page.',
+					'trigger'       => 'bottom',
+					'trigger_value' => 70,
+					'frequency'     => 'session',
+				),
+				'media'    => array(
+					'enabled'   => false,
+					'min_width' => 300,
+					'networks'  => array( 'pinterest', 'facebook', 'x', 'copy' ),
+				),
+			),
+			'style'            => array(
+				'shape'          => 'rounded',
+				'size'           => 'medium',
+				'color_scheme'   => 'network',
+				'brand_bg'       => '#3a1f4f',
+				'brand_hover'    => '#ff5a4f',
+				'icon_color'     => '#ffffff',
+				'show_labels'    => false,
+				'gap'            => 8,
+				'hover'          => 'lift',
+				'entrance'       => 'fade',
+				'more_button'    => true,
+				'max_visible'    => 6,
+			),
+			'follow'           => array(
+				'enabled'  => false,
+				'heading'  => 'Follow us',
+				'profiles' => array(),
+			),
+			'custom_css'       => '',
 		);
 	}
 
 	/**
-	 * Get list of allowed social networks.
+	 * Get settings, migrating legacy ShareNivo and ShareNova configurations.
 	 *
 	 * @return array
 	 */
-	public static function get_allowed_networks() {
-		return array(
-			'facebook'  => __( 'Facebook', 'sharenivo-fast-social-sharing' ),
-			'x'         => __( 'X (Twitter)', 'sharenivo-fast-social-sharing' ),
-			'linkedin'  => __( 'LinkedIn', 'sharenivo-fast-social-sharing' ),
-			'whatsapp'  => __( 'WhatsApp', 'sharenivo-fast-social-sharing' ),
-			'pinterest' => __( 'Pinterest', 'sharenivo-fast-social-sharing' ),
-			'threads'   => __( 'Threads', 'sharenivo-fast-social-sharing' ),
-			'bluesky'   => __( 'Bluesky', 'sharenivo-fast-social-sharing' ),
-			'telegram'  => __( 'Telegram', 'sharenivo-fast-social-sharing' ),
-			'reddit'    => __( 'Reddit', 'sharenivo-fast-social-sharing' ),
-			'email'     => __( 'Email', 'sharenivo-fast-social-sharing' ),
-		);
+	public static function get_settings() {
+		$stored = get_option( 'sharenivo_settings', false );
+
+		if ( false === $stored ) {
+			$stored = get_option( 'sharenova_settings', false );
+		}
+
+		if ( ! is_array( $stored ) ) {
+			$stored = self::get_defaults();
+		}
+
+		if ( empty( $stored['schema_version'] ) || 2 > absint( $stored['schema_version'] ) ) {
+			$stored = self::migrate_legacy_settings( $stored );
+			update_option( 'sharenivo_settings', $stored, false );
+			update_option( 'sharenivo_schema_version', 2, false );
+		}
+
+		// Move the original 2.0 default pair to the refined plum/coral brand.
+		if (
+			isset( $stored['style']['brand_bg'], $stored['style']['brand_hover'] ) &&
+			'#635bff' === strtolower( $stored['style']['brand_bg'] ) &&
+			'#ff7a66' === strtolower( $stored['style']['brand_hover'] )
+		) {
+			$stored['style']['brand_bg']    = '#3a1f4f';
+			$stored['style']['brand_hover'] = '#ff5a4f';
+			update_option( 'sharenivo_settings', $stored, false );
+		}
+
+		$settings = self::normalize_settings( $stored );
+
+		/**
+		 * Filter normalized settings at runtime.
+		 *
+		 * @param array $settings ShareNivo settings.
+		 */
+		$settings = apply_filters( 'sharenivo_settings', $settings );
+		$settings = apply_filters( 'sharenova_settings', $settings );
+
+		return is_array( $settings ) ? self::normalize_settings( $settings ) : self::get_defaults();
 	}
 
 	/**
-	 * Sort networks by preferred order and append missing items.
+	 * Convert 1.x settings into the 2.0 schema.
 	 *
-	 * @param array $networks Active networks.
-	 * @param array $order    Preferred order.
+	 * @param array $legacy Legacy settings.
 	 * @return array
 	 */
-	public static function sort_networks_by_order( $networks, $order ) {
-		$networks = is_array( $networks ) ? array_values( array_unique( array_map( 'sanitize_key', $networks ) ) ) : array();
-		$order = is_array( $order ) ? array_values( array_unique( array_map( 'sanitize_key', $order ) ) ) : array();
+	private static function migrate_legacy_settings( $legacy ) {
+		$settings = self::get_defaults();
+
+		$settings['enabled']          = isset( $legacy['enabled'] ) ? (bool) $legacy['enabled'] : true;
+		$settings['networks']         = isset( $legacy['networks'] ) ? Networks::sanitize_network_list( $legacy['networks'] ) : $settings['networks'];
+		$settings['network_order']    = isset( $legacy['network_order'] ) ? self::sort_networks( $settings['networks'], $legacy['network_order'] ) : $settings['networks'];
+		$settings['post_types']       = isset( $legacy['post_types'] ) && is_array( $legacy['post_types'] ) ? $legacy['post_types'] : $settings['post_types'];
+		$settings['show_on_homepage'] = ! empty( $legacy['show_on_homepage'] );
+		$settings['custom_css']       = isset( $legacy['custom_css'] ) ? $legacy['custom_css'] : '';
+
+		$position = isset( $legacy['position'] ) ? sanitize_key( $legacy['position'] ) : 'floating_left';
+		if ( in_array( $position, array( 'inline_top', 'inline_bottom' ), true ) ) {
+			$settings['locations']['floating']['enabled'] = false;
+			$settings['locations']['inline']['enabled']   = true;
+			$settings['locations']['inline']['position']  = 'inline_top' === $position ? 'top' : 'bottom';
+		} else {
+			$settings['locations']['floating']['side'] = 'floating_right' === $position ? 'right' : 'left';
+		}
+
+		$settings['locations']['sticky']['enabled'] = 'sticky_bottom' === ( $legacy['mobile_position'] ?? 'sticky_bottom' );
+		$settings['style']['shape']                 = self::map_legacy_shape( $legacy['button_shape'] ?? 'circle' );
+		$settings['style']['size']                  = $legacy['button_size'] ?? 'medium';
+		$settings['style']['hover']                 = $legacy['hover_animation'] ?? 'lift';
+		$settings['style']['gap']                   = absint( $legacy['button_gap'] ?? 8 );
+		$settings['style']['more_button']           = ! isset( $legacy['show_more_network_button'] ) || ! empty( $legacy['show_more_network_button'] );
+
+		if ( 'custom' === ( $legacy['color_scheme'] ?? 'brand' ) ) {
+			$settings['style']['color_scheme'] = 'brand';
+			$settings['style']['brand_bg']     = $legacy['custom_bg_color'] ?? '#3a1f4f';
+			$settings['style']['brand_hover']  = $legacy['custom_hover_bg'] ?? '#ff5a4f';
+			$settings['style']['icon_color']   = $legacy['custom_icon_color'] ?? '#ffffff';
+		}
+
+		$settings['schema_version'] = 2;
+		return self::sanitize_settings( $settings );
+	}
+
+	/**
+	 * Map old button shapes.
+	 *
+	 * @param string $shape Legacy shape.
+	 * @return string
+	 */
+	private static function map_legacy_shape( $shape ) {
+		$shape = sanitize_key( $shape );
+		if ( in_array( $shape, array( 'landscape', 'portrait', 'landscape_rectangle' ), true ) ) {
+			return 'pill';
+		}
+		return in_array( $shape, array( 'circle', 'square', 'rounded' ), true ) ? $shape : 'rounded';
+	}
+
+	/**
+	 * Merge nested defaults without discarding valid saved values.
+	 *
+	 * @param array $settings Settings.
+	 * @return array
+	 */
+	private static function normalize_settings( $settings ) {
+		$defaults = self::get_defaults();
+		$settings = wp_parse_args( is_array( $settings ) ? $settings : array(), $defaults );
+		$settings['locations'] = wp_parse_args( is_array( $settings['locations'] ) ? $settings['locations'] : array(), $defaults['locations'] );
+		foreach ( $defaults['locations'] as $location => $location_defaults ) {
+			$settings['locations'][ $location ] = wp_parse_args( is_array( $settings['locations'][ $location ] ) ? $settings['locations'][ $location ] : array(), $location_defaults );
+		}
+		$settings['style']  = wp_parse_args( is_array( $settings['style'] ) ? $settings['style'] : array(), $defaults['style'] );
+		$settings['follow'] = wp_parse_args( is_array( $settings['follow'] ) ? $settings['follow'] : array(), $defaults['follow'] );
+		$settings['networks']      = Networks::sanitize_network_list( $settings['networks'] );
+		$settings['network_order'] = self::sort_networks( $settings['networks'], $settings['network_order'] );
+		return $settings;
+	}
+
+	/**
+	 * Sort active networks by a submitted order.
+	 *
+	 * @param array        $networks Active networks.
+	 * @param array|string $order    Preferred order.
+	 * @return array
+	 */
+	public static function sort_networks( $networks, $order ) {
+		$networks = Networks::sanitize_network_list( $networks );
+		if ( is_string( $order ) ) {
+			$order = explode( ',', $order );
+		}
+		$order = Networks::sanitize_network_list( is_array( $order ) ? $order : array() );
 
 		$sorted = array();
 		foreach ( $order as $network ) {
@@ -91,725 +237,453 @@ class Settings {
 				$sorted[] = $network;
 			}
 		}
-
 		foreach ( $networks as $network ) {
 			if ( ! in_array( $network, $sorted, true ) ) {
 				$sorted[] = $network;
 			}
 		}
-
 		return $sorted;
 	}
 
 	/**
-	 * Get plugin settings.
+	 * Validate the complete settings tree.
 	 *
-	 * @return array Settings array.
+	 * @param array $input Untrusted settings.
+	 * @return array
 	 */
-	public static function get_settings() {
-		$defaults = self::get_default_settings();
-		$settings = get_option( 'sharenivo_settings', false );
+	public static function sanitize_settings( $input ) {
+		$defaults = self::get_defaults();
+		$input    = is_array( $input ) ? $input : array();
+		$locations = isset( $input['locations'] ) && is_array( $input['locations'] ) ? $input['locations'] : array();
+		$style     = isset( $input['style'] ) && is_array( $input['style'] ) ? $input['style'] : array();
+		$follow    = isset( $input['follow'] ) && is_array( $input['follow'] ) ? $input['follow'] : array();
 
-		// Migrate the old option once, without deleting it. This keeps upgrades
-		// safe for existing installations and third-party integrations.
-		if ( false === $settings ) {
-			$settings = get_option( 'sharenova_settings', $defaults );
-			if ( is_array( $settings ) && false === get_option( 'sharenivo_settings', false ) ) {
-				add_option( 'sharenivo_settings', $settings, '', 'no' );
+		$networks = Networks::sanitize_network_list( $input['networks'] ?? array() );
+		$order    = self::sort_networks( $networks, $input['network_order'] ?? array() );
+
+		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
+		unset( $public_post_types['attachment'] );
+		$post_types = array();
+		if ( isset( $input['post_types'] ) && is_array( $input['post_types'] ) ) {
+			$post_types = array_values( array_intersect( array_values( $public_post_types ), array_map( 'sanitize_key', $input['post_types'] ) ) );
+		}
+
+		$trigger_options   = array( 'delay', 'scroll', 'bottom', 'inactivity', 'exit', 'comment', 'purchase' );
+		$frequency_options = array( 'always', 'session', 'day', 'week' );
+		$shape_options     = array( 'circle', 'rounded', 'square', 'pill' );
+		$size_options      = array( 'small', 'medium', 'large' );
+		$color_options     = array( 'network', 'brand', 'minimal' );
+		$hover_options     = array( 'lift', 'grow', 'slide', 'none' );
+		$entrance_options  = array( 'fade', 'slide', 'zoom', 'none' );
+
+		$clean = array(
+			'schema_version'   => 2,
+			'enabled'          => ! empty( $input['enabled'] ),
+			'networks'         => $networks,
+			'network_order'    => $order,
+			'post_types'       => $post_types,
+			'show_on_homepage' => ! empty( $input['show_on_homepage'] ),
+			'locations'        => array(),
+			'style'            => array(),
+			'follow'           => array(),
+			'custom_css'       => sanitize_textarea_field( $input['custom_css'] ?? '' ),
+		);
+
+		$floating = isset( $locations['floating'] ) && is_array( $locations['floating'] ) ? $locations['floating'] : array();
+		$clean['locations']['floating'] = array(
+			'enabled'     => ! empty( $floating['enabled'] ),
+			'side'        => self::allow_value( $floating['side'] ?? '', array( 'left', 'right' ), 'left' ),
+			'vertical'    => max( 10, min( 90, absint( $floating['vertical'] ?? 50 ) ) ),
+			'hide_mobile' => ! empty( $floating['hide_mobile'] ),
+		);
+
+		$inline = isset( $locations['inline'] ) && is_array( $locations['inline'] ) ? $locations['inline'] : array();
+		$clean['locations']['inline'] = array(
+			'enabled'   => ! empty( $inline['enabled'] ),
+			'position'  => self::allow_value( $inline['position'] ?? '', array( 'top', 'bottom', 'both' ), 'bottom' ),
+			'alignment' => self::allow_value( $inline['alignment'] ?? '', array( 'left', 'center', 'right' ), 'left' ),
+		);
+
+		$sticky = isset( $locations['sticky'] ) && is_array( $locations['sticky'] ) ? $locations['sticky'] : array();
+		$clean['locations']['sticky'] = array(
+			'enabled'   => ! empty( $sticky['enabled'] ),
+			'width'     => self::allow_value( $sticky['width'] ?? '', array( 'compact', 'full' ), 'compact' ),
+			'alignment' => self::allow_value( $sticky['alignment'] ?? '', array( 'left', 'center', 'right' ), 'center' ),
+		);
+
+		foreach ( array( 'popup', 'flyin' ) as $location ) {
+			$value = isset( $locations[ $location ] ) && is_array( $locations[ $location ] ) ? $locations[ $location ] : array();
+			$clean['locations'][ $location ] = array(
+				'enabled'       => ! empty( $value['enabled'] ),
+				'title'         => sanitize_text_field( $value['title'] ?? $defaults['locations'][ $location ]['title'] ),
+				'message'       => sanitize_textarea_field( $value['message'] ?? $defaults['locations'][ $location ]['message'] ),
+				'trigger'       => self::allow_value( $value['trigger'] ?? '', $trigger_options, $defaults['locations'][ $location ]['trigger'] ),
+				'trigger_value' => max( 1, min( 600, absint( $value['trigger_value'] ?? $defaults['locations'][ $location ]['trigger_value'] ) ) ),
+				'frequency'     => self::allow_value( $value['frequency'] ?? '', $frequency_options, 'session' ),
+			);
+			if ( 'flyin' === $location ) {
+				$clean['locations'][ $location ]['side'] = self::allow_value( $value['side'] ?? '', array( 'left', 'right' ), 'right' );
 			}
 		}
 
-		$settings = wp_parse_args( $settings, $defaults );
-		if ( isset( $settings['button_shape'] ) && in_array( $settings['button_shape'], array( 'portrait', 'landscape_rectangle' ), true ) ) {
-			$settings['button_shape'] = 'landscape';
+		$media = isset( $locations['media'] ) && is_array( $locations['media'] ) ? $locations['media'] : array();
+		$clean['locations']['media'] = array(
+			'enabled'   => ! empty( $media['enabled'] ),
+			'min_width' => max( 120, min( 1200, absint( $media['min_width'] ?? 300 ) ) ),
+			'networks'  => Networks::sanitize_network_list( $media['networks'] ?? array() ),
+		);
+
+		$brand_bg    = sanitize_hex_color( $style['brand_bg'] ?? $defaults['style']['brand_bg'] );
+		$brand_hover = sanitize_hex_color( $style['brand_hover'] ?? $defaults['style']['brand_hover'] );
+		$icon_color  = sanitize_hex_color( $style['icon_color'] ?? $defaults['style']['icon_color'] );
+
+		$clean['style'] = array(
+			'shape'        => self::allow_value( $style['shape'] ?? '', $shape_options, 'rounded' ),
+			'size'         => self::allow_value( $style['size'] ?? '', $size_options, 'medium' ),
+			'color_scheme' => self::allow_value( $style['color_scheme'] ?? '', $color_options, 'network' ),
+			'brand_bg'     => $brand_bg ? $brand_bg : $defaults['style']['brand_bg'],
+			'brand_hover'  => $brand_hover ? $brand_hover : $defaults['style']['brand_hover'],
+			'icon_color'   => $icon_color ? $icon_color : $defaults['style']['icon_color'],
+			'show_labels'  => ! empty( $style['show_labels'] ),
+			'gap'          => min( 30, absint( $style['gap'] ?? 8 ) ),
+			'hover'        => self::allow_value( $style['hover'] ?? '', $hover_options, 'lift' ),
+			'entrance'     => self::allow_value( $style['entrance'] ?? '', $entrance_options, 'fade' ),
+			'more_button'  => ! empty( $style['more_button'] ),
+			'max_visible'  => max( 3, min( 12, absint( $style['max_visible'] ?? 6 ) ) ),
+		);
+
+		$profiles = array();
+		$allowed_profiles = Networks::get_follow_networks();
+		if ( isset( $follow['profiles'] ) && is_array( $follow['profiles'] ) ) {
+			foreach ( $follow['profiles'] as $network => $profile_url ) {
+				$network = sanitize_key( $network );
+				$url     = esc_url_raw( $profile_url );
+				if ( isset( $allowed_profiles[ $network ] ) && $url ) {
+					$profiles[ $network ] = $url;
+				}
+			}
 		}
-		$settings['networks'] = self::sort_networks_by_order( $settings['networks'], $settings['network_order'] );
-		$settings['network_order'] = $settings['networks'];
+		$clean['follow'] = array(
+			'enabled'  => ! empty( $follow['enabled'] ),
+			'heading'  => sanitize_text_field( $follow['heading'] ?? $defaults['follow']['heading'] ),
+			'profiles' => $profiles,
+		);
 
-		/**
-		 * Filter plugin settings before use.
-		 *
-		 * @param array $settings Current settings.
-		 */
-		$filtered_settings = apply_filters( 'sharenivo_settings', $settings );
-		$filtered_settings = apply_filters( 'sharenova_settings', $filtered_settings );
-		if ( ! is_array( $filtered_settings ) ) {
-			return $settings;
-		}
-
-		$filtered_settings = wp_parse_args( $filtered_settings, $defaults );
-		$filtered_settings['networks'] = self::sort_networks_by_order( $filtered_settings['networks'], $filtered_settings['network_order'] );
-		$filtered_settings['network_order'] = $filtered_settings['networks'];
-
-		return $filtered_settings;
+		return $clean;
 	}
 
 	/**
-	 * Render settings page.
+	 * Validate an enumerated value.
+	 *
+	 * @param mixed  $value    Submitted value.
+	 * @param array  $allowed  Allowed values.
+	 * @param string $fallback Fallback value.
+	 * @return string
+	 */
+	private static function allow_value( $value, $allowed, $fallback ) {
+		$value = sanitize_key( $value );
+		return in_array( $value, $allowed, true ) ? $value : $fallback;
+	}
+
+	/**
+	 * Render the settings dashboard.
 	 */
 	public function render_page() {
-		// Handle form submission.
-		if ( isset( $_POST['sharenivo_save_settings'] ) ) {
-			if ( ! isset( $_POST['sharenivo_settings_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['sharenivo_settings_nonce'] ) ), 'sharenivo_save_settings' ) ) {
-				wp_die( esc_html__( 'Security check failed', 'sharenivo-fast-social-sharing' ) );
-			}
-			$this->save_settings();
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
 		}
 
-		$active_tab = isset( $_POST['sharenivo_active_tab'] ) ? sanitize_text_field( wp_unslash( $_POST['sharenivo_active_tab'] ) ) : '#general';
-
-		$settings = self::get_settings();
-		$ordered_networks = self::sort_networks_by_order( $settings['networks'], $settings['network_order'] );
+		$settings        = self::get_settings();
+		$share_networks  = Networks::get_share_networks();
+		$follow_networks = Networks::get_follow_networks();
+		$post_types      = get_post_types( array( 'public' => true ), 'objects' );
+		unset( $post_types['attachment'] );
 		?>
-		<div class="wrap sharenivo-settings-wrap">
-			<div class="sharenivo-page-header">
-				<div class="sharenivo-header-info">
-					<h1><?php echo esc_html__( 'ShareNivo', 'sharenivo-fast-social-sharing' ); ?></h1>
-					<p class="sharenivo-header-subtitle"><?php esc_html_e( 'Fast, privacy-first sharing with a focused setup experience.', 'sharenivo-fast-social-sharing' ); ?></p>
+		<div class="wrap sharenivo-admin" data-sharenivo-version="<?php echo esc_attr( SHARENIVO_VERSION ); ?>">
+			<?php if ( isset( $_GET['sharenivo-updated'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['sharenivo-updated'] ) ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only status flag. ?>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'ShareNivo settings saved.', 'sharenivo-fast-social-sharing' ); ?></p></div>
+			<?php endif; ?>
+			<header class="sharenivo-admin__header">
+				<div class="sharenivo-brand">
+					<span class="sharenivo-brand__mark" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="13" cy="14" r="7"/><circle cx="35" cy="10" r="6"/><circle cx="34" cy="36" r="8"/><path d="m19 13 10-2M17 19l12 12"/></svg></span>
+					<div><h1><?php esc_html_e( 'ShareNivo', 'sharenivo-fast-social-sharing' ); ?></h1><p><?php esc_html_e( 'Fast social reach. Zero tracking. Your design.', 'sharenivo-fast-social-sharing' ); ?></p></div>
 				</div>
-				<div class="sharenivo-header-badge"><?php echo esc_html__( 'Version', 'sharenivo-fast-social-sharing' ) . ' ' . esc_html( SHARENIVO_VERSION ); ?></div>
-			</div>
-			
-			<div class="sharenivo-layout">
-				<aside class="sharenivo-sidebar">
-					<div class="sharenivo-sidebar-header"><?php esc_html_e( 'Settings', 'sharenivo-fast-social-sharing' ); ?></div>
-					<nav class="sharenivo-tab-nav">
-						<a href="#general" class="sharenivo-tab-link active">
-							<svg class="sharenivo-tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-							<?php esc_html_e( 'General', 'sharenivo-fast-social-sharing' ); ?>
-						</a>
-						<a href="#display" class="sharenivo-tab-link">
-							<svg class="sharenivo-tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-							<?php esc_html_e( 'Display', 'sharenivo-fast-social-sharing' ); ?>
-						</a>
-						<a href="#style" class="sharenivo-tab-link">
-							<svg class="sharenivo-tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
-							<?php esc_html_e( 'Style', 'sharenivo-fast-social-sharing' ); ?>
-						</a>
-						<a href="#advanced" class="sharenivo-tab-link">
-							<svg class="sharenivo-tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-							<?php esc_html_e( 'Advanced', 'sharenivo-fast-social-sharing' ); ?>
-						</a>
-					</nav>
-				</aside>
+				<div class="sharenivo-admin__status"><span><?php esc_html_e( 'No external requests', 'sharenivo-fast-social-sharing' ); ?></span><strong>v<?php echo esc_html( SHARENIVO_VERSION ); ?></strong></div>
+			</header>
 
-				<main class="sharenivo-main">
-					<form method="post" action="" class="sharenivo-form-wrap">
-						<?php wp_nonce_field( 'sharenivo_save_settings', 'sharenivo_settings_nonce' ); ?>
-						<input type="hidden" name="sharenivo_save_settings" value="1" />
-						<input type="hidden" name="sharenivo_active_tab" id="sharenivo_active_tab" value="<?php echo esc_attr( $active_tab ); ?>">
+			<div class="sharenivo-admin__shell">
+				<nav class="sharenivo-tabs" aria-label="<?php esc_attr_e( 'ShareNivo settings', 'sharenivo-fast-social-sharing' ); ?>">
+					<?php
+					$tabs = array(
+						'overview'  => __( 'Overview', 'sharenivo-fast-social-sharing' ),
+						'networks'  => __( 'Networks', 'sharenivo-fast-social-sharing' ),
+						'locations' => __( 'Locations', 'sharenivo-fast-social-sharing' ),
+						'design'    => __( 'Design', 'sharenivo-fast-social-sharing' ),
+						'follow'    => __( 'Follow', 'sharenivo-fast-social-sharing' ),
+						'advanced'  => __( 'Advanced', 'sharenivo-fast-social-sharing' ),
+					);
+					foreach ( $tabs as $tab => $label ) :
+						?>
+						<button type="button" class="sharenivo-tabs__button<?php echo esc_attr( 'overview' === $tab ? ' is-active' : '' ); ?>" data-tab="<?php echo esc_attr( $tab ); ?>" aria-selected="<?php echo esc_attr( 'overview' === $tab ? 'true' : 'false' ); ?>"><?php echo esc_html( $label ); ?></button>
+					<?php endforeach; ?>
+				</nav>
 
-					<!-- General Tab -->
-					<div id="general" class="sharenivo-tab-content active">
-						<div class="sharenivo-panel-header">
-							<div class="sharenivo-panel-icon">
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-							</div>
-							<div>
-								<h3 class="sharenivo-panel-title"><?php esc_html_e( 'General Settings', 'sharenivo-fast-social-sharing' ); ?></h3>
-								<p class="sharenivo-panel-desc"><?php esc_html_e( 'Core configuration and network selection.', 'sharenivo-fast-social-sharing' ); ?></p>
-							</div>
+				<form class="sharenivo-settings-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<?php wp_nonce_field( 'sharenivo_save_settings', 'sharenivo_settings_nonce' ); ?>
+					<input type="hidden" name="action" value="sharenivo_save_settings_action">
+
+					<section class="sharenivo-panel is-active" data-panel="overview">
+						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Control center', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'ShareNivo at a glance', 'sharenivo-fast-social-sharing' ); ?></h2></div></div>
+						<div class="sharenivo-metrics">
+							<div><strong><?php echo esc_html( count( $settings['networks'] ) ); ?></strong><span><?php esc_html_e( 'Active share options', 'sharenivo-fast-social-sharing' ); ?></span></div>
+							<div><strong><?php echo esc_html( self::count_active_locations( $settings['locations'] ) ); ?></strong><span><?php esc_html_e( 'Enabled locations', 'sharenivo-fast-social-sharing' ); ?></span></div>
+							<div><strong>0</strong><span><?php esc_html_e( 'Tracking requests', 'sharenivo-fast-social-sharing' ); ?></span></div>
 						</div>
-						
-						<div class="sharenivo-panel-body">
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Master Switch', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Enable or disable all sharing features.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<label class="sharenivo-toggle-wrap">
-										<div class="sharenivo-toggle">
-											<input type="checkbox" name="sharenivo_settings[enabled]" value="1" <?php checked( $settings['enabled'], true ); ?> />
-											<div class="sharenivo-toggle-slider"></div>
-										</div>
-										<span class="sharenivo-toggle-label"><?php esc_html_e( 'Enable Plugin', 'sharenivo-fast-social-sharing' ); ?></span>
-									</label>
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Active Networks', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Select networks to display on your site.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<div class="sharenivo-network-chips">
-										<?php
-										$available_networks = self::get_allowed_networks();
-										foreach ( $available_networks as $key => $label ) :
-											$checked = in_array( $key, $settings['networks'], true );
-											?>
-											<label class="sharenivo-network-chip <?php echo esc_attr( $checked ? 'sharenivo-chip-active' : '' ); ?>">
-												<span class="sharenivo-chip-dot"></span>
-												<span class="sharenivo-chip-text"><?php echo esc_html( $label ); ?></span>
-												<input type="checkbox" class="sharenivo-network-checkbox" data-network-label="<?php echo esc_attr( wp_strip_all_tags( $label ) ); ?>" name="sharenivo_settings[networks][]" value="<?php echo esc_attr( $key ); ?>" <?php checked( $checked, true ); ?> />
-											</label>
-										<?php endforeach; ?>
-									</div>
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Network Order', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Drag to arrange. First 4 show by default.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<ul id="sharenivo-network-order-list" class="sharenivo-network-order-list">
-										<?php foreach ( $ordered_networks as $network ) : ?>
-											<?php
-											$network = sanitize_key( $network );
-											if ( ! isset( $available_networks[ $network ] ) ) {
-												continue;
-											}
-											?>
-											<li data-network="<?php echo esc_attr( $network ); ?>">
-												<span class="sharenivo-order-drag">&#9783;</span>
-												<span class="sharenivo-order-label"><?php echo esc_html( $available_networks[ $network ] ); ?></span>
-												<button type="button" class="sharenivo-order-btn sharenivo-order-up" aria-label="<?php esc_attr_e( 'Move up', 'sharenivo-fast-social-sharing' ); ?>"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button>
-												<button type="button" class="sharenivo-order-btn sharenivo-order-down" aria-label="<?php esc_attr_e( 'Move down', 'sharenivo-fast-social-sharing' ); ?>"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
-											</li>
-										<?php endforeach; ?>
-									</ul>
-									<input type="hidden" id="sharenivo-network-order" name="sharenivo_settings[network_order]" value="<?php echo esc_attr( implode( ',', $ordered_networks ) ); ?>" />
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row sharenivo-more-button-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Smart Expand', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Hide excess networks behind a menu.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<label class="sharenivo-toggle-wrap">
-										<div class="sharenivo-toggle">
-											<input type="checkbox" name="sharenivo_settings[show_more_network_button]" value="1" <?php checked( $settings['show_more_network_button'], true ); ?> />
-											<div class="sharenivo-toggle-slider"></div>
-										</div>
-										<span class="sharenivo-toggle-label"><?php esc_html_e( 'Enable compact More button', 'sharenivo-fast-social-sharing' ); ?></span>
-									</label>
-									<p class="sharenivo-description"><?php esc_html_e( 'Only applies when 5 or more networks are selected. Otherwise, it hides automatically.', 'sharenivo-fast-social-sharing' ); ?></p>
-								</div>
-							</div>
+						<div class="sharenivo-card sharenivo-master-card">
+							<div><h3><?php esc_html_e( 'Master switch', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'Pause all ShareNivo output without losing your configuration.', 'sharenivo-fast-social-sharing' ); ?></p></div>
+							<?php self::render_toggle( 'sharenivo_settings[enabled]', $settings['enabled'], __( 'Enable ShareNivo', 'sharenivo-fast-social-sharing' ) ); ?>
 						</div>
-					</div>
-
-					<!-- Display Tab -->
-					<div id="display" class="sharenivo-tab-content">
-						<div class="sharenivo-panel-header">
-							<div class="sharenivo-panel-icon">
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-							</div>
-							<div>
-								<h3 class="sharenivo-panel-title"><?php esc_html_e( 'Display Settings', 'sharenivo-fast-social-sharing' ); ?></h3>
-								<p class="sharenivo-panel-desc"><?php esc_html_e( 'Control where and how the buttons appear.', 'sharenivo-fast-social-sharing' ); ?></p>
-							</div>
+						<div class="sharenivo-feature-grid">
+							<div class="sharenivo-card"><span class="sharenivo-card__icon">01</span><h3><?php esc_html_e( 'Multiple placements', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'Use inline, floating, mobile sticky, popup, fly-in, and media sharing together.', 'sharenivo-fast-social-sharing' ); ?></p></div>
+							<div class="sharenivo-card"><span class="sharenivo-card__icon">02</span><h3><?php esc_html_e( 'Smart local triggers', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'Trigger prompts by time, scroll, reading completion, inactivity, comments, or purchases.', 'sharenivo-fast-social-sharing' ); ?></p></div>
+							<div class="sharenivo-card"><span class="sharenivo-card__icon">03</span><h3><?php esc_html_e( 'Privacy by design', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'No API calls, tracking pixels, remote fonts, share counts, or analytics beacons.', 'sharenivo-fast-social-sharing' ); ?></p></div>
 						</div>
-						
-						<div class="sharenivo-panel-body">
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Locations', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Select which pages show buttons.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<div class="sharenivo-network-chips">
-										<label class="sharenivo-network-chip <?php echo esc_attr( ! empty( $settings['show_on_homepage'] ) ? 'sharenivo-chip-active' : '' ); ?>">
-											<span class="sharenivo-chip-dot"></span>
-											<span class="sharenivo-chip-text"><?php esc_html_e( 'Homepage (Front Page)', 'sharenivo-fast-social-sharing' ); ?></span>
-											<input type="checkbox" name="sharenivo_settings[show_on_homepage]" value="1" <?php checked( ! empty( $settings['show_on_homepage'] ), true ); ?> />
-										</label>
+					</section>
 
-										<?php
-										$post_types = get_post_types( array( 'public' => true ), 'objects' );
-										foreach ( $post_types as $post_type ) :
-											if ( 'attachment' === $post_type->name ) {
-												continue;
-											}
-											$checked = in_array( $post_type->name, $settings['post_types'], true );
-											?>
-											<label class="sharenivo-network-chip <?php echo esc_attr( $checked ? 'sharenivo-chip-active' : '' ); ?>">
-												<span class="sharenivo-chip-dot"></span>
-												<span class="sharenivo-chip-text"><?php echo esc_html( $post_type->label ); ?></span>
-												<input type="checkbox" name="sharenivo_settings[post_types][]" value="<?php echo esc_attr( $post_type->name ); ?>" <?php checked( $checked, true ); ?> />
-											</label>
-										<?php endforeach; ?>
-									</div>
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Auto Detect', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Future post types support.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<label class="sharenivo-toggle-wrap">
-										<div class="sharenivo-toggle">
-											<input type="checkbox" name="sharenivo_settings[auto_detect_post_types]" value="1" <?php checked( $settings['auto_detect_post_types'], true ); ?> />
-											<div class="sharenivo-toggle-slider"></div>
-										</div>
-										<span class="sharenivo-toggle-label"><?php esc_html_e( 'Include new Custom Post Types automatically', 'sharenivo-fast-social-sharing' ); ?></span>
-									</label>
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Desktop Position', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Where to show on large screens.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<select name="sharenivo_settings[position]" class="sharenivo-select">
-										<option value="floating_left" <?php selected( $settings['position'], 'floating_left' ); ?>><?php esc_html_e( 'Floating Left (Sidebar)', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="floating_right" <?php selected( $settings['position'], 'floating_right' ); ?>><?php esc_html_e( 'Floating Right (Sidebar)', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="inline_top" <?php selected( $settings['position'], 'inline_top' ); ?>><?php esc_html_e( 'Inline Top (Above Content)', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="inline_bottom" <?php selected( $settings['position'], 'inline_bottom' ); ?>><?php esc_html_e( 'Inline Bottom (Below Content)', 'sharenivo-fast-social-sharing' ); ?></option>
-									</select>
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Mobile Position', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Where to show on small screens.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<select name="sharenivo_settings[mobile_position]" class="sharenivo-select">
-										<option value="sticky_bottom" <?php selected( $settings['mobile_position'], 'sticky_bottom' ); ?>><?php esc_html_e( 'Sticky Bottom Bar (Recommended)', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="inline" <?php selected( $settings['mobile_position'], 'inline' ); ?>><?php esc_html_e( 'Inline (Matches Desktop Layout)', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="hidden" <?php selected( $settings['mobile_position'], 'hidden' ); ?>><?php esc_html_e( 'Hidden on Mobile', 'sharenivo-fast-social-sharing' ); ?></option>
-									</select>
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row sharenivo-inline-alignment-row" style="<?php echo esc_attr( in_array( $settings['position'], array( 'inline_top', 'inline_bottom' ), true ) ? '' : 'display:none;' ); ?>">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Inline Alignment', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Align buttons for top/bottom positions.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<select name="sharenivo_settings[inline_alignment]" class="sharenivo-select">
-										<option value="left" <?php selected( $settings['inline_alignment'] ?? 'left', 'left' ); ?>><?php esc_html_e( 'Left', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="center" <?php selected( $settings['inline_alignment'] ?? 'left', 'center' ); ?>><?php esc_html_e( 'Center', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="right" <?php selected( $settings['inline_alignment'] ?? 'left', 'right' ); ?>><?php esc_html_e( 'Right', 'sharenivo-fast-social-sharing' ); ?></option>
-									</select>
-								</div>
-							</div>
+					<section class="sharenivo-panel" data-panel="networks" hidden>
+						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( '2026-ready', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Sharing networks', 'sharenivo-fast-social-sharing' ); ?></h2><p><?php esc_html_e( 'Only networks with current browser sharing flows are included.', 'sharenivo-fast-social-sharing' ); ?></p></div></div>
+						<div class="sharenivo-network-grid">
+							<?php foreach ( $share_networks as $network => $data ) : $checked = in_array( $network, $settings['networks'], true ); ?>
+								<label class="sharenivo-network-card<?php echo esc_attr( $checked ? ' is-selected' : '' ); ?>" data-network="<?php echo esc_attr( $network ); ?>">
+									<input class="sharenivo-network-checkbox" type="checkbox" name="sharenivo_settings[networks][]" value="<?php echo esc_attr( $network ); ?>" <?php checked( $checked ); ?>>
+									<span class="sharenivo-network-card__icon" style="--network-color:<?php echo esc_attr( $data['color'] ); ?>"><?php echo wp_kses( Networks::get_icon( $network ), self::svg_allowed_html() ); ?></span>
+									<span><?php echo esc_html( $data['label'] ); ?></span>
+								</label>
+							<?php endforeach; ?>
 						</div>
-					</div>
+						<div class="sharenivo-card"><h3><?php esc_html_e( 'Display order', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'Use the controls to set an accessible, deterministic order.', 'sharenivo-fast-social-sharing' ); ?></p><ol class="sharenivo-order-list" id="sharenivo-order-list">
+							<?php foreach ( $settings['network_order'] as $network ) : if ( ! isset( $share_networks[ $network ] ) ) { continue; } ?>
+								<li data-network="<?php echo esc_attr( $network ); ?>"><span><?php echo esc_html( $share_networks[ $network ]['label'] ); ?></span><span><button type="button" class="sharenivo-order-up" aria-label="<?php esc_attr_e( 'Move up', 'sharenivo-fast-social-sharing' ); ?>">↑</button><button type="button" class="sharenivo-order-down" aria-label="<?php esc_attr_e( 'Move down', 'sharenivo-fast-social-sharing' ); ?>">↓</button></span></li>
+							<?php endforeach; ?>
+						</ol><input type="hidden" id="sharenivo-network-order" name="sharenivo_settings[network_order]" value="<?php echo esc_attr( implode( ',', $settings['network_order'] ) ); ?>"></div>
+					</section>
 
-					<!-- Style Tab -->
-					<div id="style" class="sharenivo-tab-content">
-						
-						<div class="sharenivo-panel-header">
-							<div class="sharenivo-panel-icon">
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
-							</div>
-							<div>
-								<h3 class="sharenivo-panel-title"><?php esc_html_e( 'Style Settings', 'sharenivo-fast-social-sharing' ); ?></h3>
-								<p class="sharenivo-panel-desc"><?php esc_html_e( 'Customize shape, size, colors, and animations.', 'sharenivo-fast-social-sharing' ); ?></p>
-							</div>
+					<section class="sharenivo-panel" data-panel="locations" hidden>
+						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Placement engine', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Choose where sharing appears', 'sharenivo-fast-social-sharing' ); ?></h2></div></div>
+						<div class="sharenivo-location-grid">
+							<?php self::render_location_card( 'floating', __( 'Floating rail', 'sharenivo-fast-social-sharing' ), __( 'Persistent desktop sharing on the left or right edge.', 'sharenivo-fast-social-sharing' ), $settings ); ?>
+							<?php self::render_location_card( 'inline', __( 'Inline buttons', 'sharenivo-fast-social-sharing' ), __( 'Place buttons above, below, or around the post content.', 'sharenivo-fast-social-sharing' ), $settings ); ?>
+							<?php self::render_location_card( 'sticky', __( 'Mobile sticky bar', 'sharenivo-fast-social-sharing' ), __( 'Thumb-friendly sharing at the bottom of small screens.', 'sharenivo-fast-social-sharing' ), $settings ); ?>
+							<?php self::render_location_card( 'popup', __( 'Share popup', 'sharenivo-fast-social-sharing' ), __( 'Accessible modal prompt controlled by a local trigger.', 'sharenivo-fast-social-sharing' ), $settings ); ?>
+							<?php self::render_location_card( 'flyin', __( 'Share fly-in', 'sharenivo-fast-social-sharing' ), __( 'A compact corner prompt for engaged readers.', 'sharenivo-fast-social-sharing' ), $settings ); ?>
+							<?php self::render_location_card( 'media', __( 'Image sharing', 'sharenivo-fast-social-sharing' ), __( 'Show lightweight share controls over eligible post images.', 'sharenivo-fast-social-sharing' ), $settings ); ?>
 						</div>
-						
-						<div class="sharenivo-panel-body">
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Button Shape', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<select name="sharenivo_settings[button_shape]" class="sharenivo-select">
-										<option value="circle" <?php selected( $settings['button_shape'], 'circle' ); ?>><?php esc_html_e( 'Perfect Circle', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="rounded" <?php selected( $settings['button_shape'], 'rounded' ); ?>><?php esc_html_e( 'Rounded Corners', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="landscape" <?php selected( $settings['button_shape'], 'landscape' ); ?>><?php esc_html_e( 'Landscape Rectangle', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="square" <?php selected( $settings['button_shape'], 'square' ); ?>><?php esc_html_e( 'Sharp Square', 'sharenivo-fast-social-sharing' ); ?></option>
-									</select>
-								</div>
-							</div>
+					</section>
 
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Button Size', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<select name="sharenivo_settings[button_size]" class="sharenivo-select">
-										<option value="small" <?php selected( $settings['button_size'], 'small' ); ?>><?php esc_html_e( 'Small', 'sharenivo-fast-social-sharing' ); ?> (40px)</option>
-										<option value="medium" <?php selected( $settings['button_size'], 'medium' ); ?>><?php esc_html_e( 'Medium', 'sharenivo-fast-social-sharing' ); ?> (50px)</option>
-										<option value="large" <?php selected( $settings['button_size'], 'large' ); ?>><?php esc_html_e( 'Large', 'sharenivo-fast-social-sharing' ); ?> (60px)</option>
-									</select>
-								</div>
-							</div>
+					<section class="sharenivo-panel" data-panel="design" hidden>
+						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Original ShareNivo system', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Design and motion', 'sharenivo-fast-social-sharing' ); ?></h2></div></div>
+						<div class="sharenivo-design-layout"><div class="sharenivo-card sharenivo-fields">
+							<?php self::render_select_field( __( 'Button shape', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][shape]', $settings['style']['shape'], array( 'circle' => __( 'Circle', 'sharenivo-fast-social-sharing' ), 'rounded' => __( 'Rounded', 'sharenivo-fast-social-sharing' ), 'square' => __( 'Square', 'sharenivo-fast-social-sharing' ), 'pill' => __( 'Pill', 'sharenivo-fast-social-sharing' ) ) ); ?>
+							<?php self::render_select_field( __( 'Button size', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][size]', $settings['style']['size'], array( 'small' => __( 'Small', 'sharenivo-fast-social-sharing' ), 'medium' => __( 'Medium', 'sharenivo-fast-social-sharing' ), 'large' => __( 'Large', 'sharenivo-fast-social-sharing' ) ) ); ?>
+							<?php self::render_select_field( __( 'Color system', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][color_scheme]', $settings['style']['color_scheme'], array( 'network' => __( 'Network colors', 'sharenivo-fast-social-sharing' ), 'brand' => __( 'ShareNivo brand', 'sharenivo-fast-social-sharing' ), 'minimal' => __( 'Minimal monochrome', 'sharenivo-fast-social-sharing' ) ) ); ?>
+							<div class="sharenivo-field sharenivo-color-fields"><label><?php esc_html_e( 'Brand background', 'sharenivo-fast-social-sharing' ); ?><input class="sharenivo-color" type="text" name="sharenivo_settings[style][brand_bg]" value="<?php echo esc_attr( $settings['style']['brand_bg'] ); ?>"></label><label><?php esc_html_e( 'Brand hover', 'sharenivo-fast-social-sharing' ); ?><input class="sharenivo-color" type="text" name="sharenivo_settings[style][brand_hover]" value="<?php echo esc_attr( $settings['style']['brand_hover'] ); ?>"></label><label><?php esc_html_e( 'Icon color', 'sharenivo-fast-social-sharing' ); ?><input class="sharenivo-color" type="text" name="sharenivo_settings[style][icon_color]" value="<?php echo esc_attr( $settings['style']['icon_color'] ); ?>"></label></div>
+							<?php self::render_select_field( __( 'Hover effect', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][hover]', $settings['style']['hover'], array( 'lift' => __( 'Lift', 'sharenivo-fast-social-sharing' ), 'grow' => __( 'Grow', 'sharenivo-fast-social-sharing' ), 'slide' => __( 'Icon slide', 'sharenivo-fast-social-sharing' ), 'none' => __( 'None', 'sharenivo-fast-social-sharing' ) ) ); ?>
+							<?php self::render_select_field( __( 'Entrance effect', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][entrance]', $settings['style']['entrance'], array( 'fade' => __( 'Fade', 'sharenivo-fast-social-sharing' ), 'slide' => __( 'Slide', 'sharenivo-fast-social-sharing' ), 'zoom' => __( 'Zoom', 'sharenivo-fast-social-sharing' ), 'none' => __( 'None', 'sharenivo-fast-social-sharing' ) ) ); ?>
+							<div class="sharenivo-field"><label><?php esc_html_e( 'Gap (px)', 'sharenivo-fast-social-sharing' ); ?><input type="number" min="0" max="30" name="sharenivo_settings[style][gap]" value="<?php echo esc_attr( $settings['style']['gap'] ); ?>"></label></div>
+							<div class="sharenivo-field"><label><?php esc_html_e( 'Visible before More', 'sharenivo-fast-social-sharing' ); ?><input type="number" min="3" max="12" name="sharenivo_settings[style][max_visible]" value="<?php echo esc_attr( $settings['style']['max_visible'] ); ?>"></label></div>
+							<?php self::render_toggle( 'sharenivo_settings[style][show_labels]', $settings['style']['show_labels'], __( 'Show network labels', 'sharenivo-fast-social-sharing' ) ); ?>
+							<?php self::render_toggle( 'sharenivo_settings[style][more_button]', $settings['style']['more_button'], __( 'Use compact More menu', 'sharenivo-fast-social-sharing' ) ); ?>
+						</div><div class="sharenivo-preview"><span><?php esc_html_e( 'Live preview', 'sharenivo-fast-social-sharing' ); ?></span><div class="sharenivo-preview__canvas"><div class="sharenivo-preview__buttons"><i class="is-facebook"><?php echo wp_kses( Networks::get_icon( 'facebook' ), self::svg_allowed_html() ); ?></i><i class="is-x"><?php echo wp_kses( Networks::get_icon( 'x' ), self::svg_allowed_html() ); ?></i><i class="is-linkedin"><?php echo wp_kses( Networks::get_icon( 'linkedin' ), self::svg_allowed_html() ); ?></i></div></div></div></div>
+					</section>
 
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Color Scheme', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<select name="sharenivo_settings[color_scheme]" id="sharenivo-color-scheme" class="sharenivo-select">
-										<option value="brand" <?php selected( $settings['color_scheme'], 'brand' ); ?>><?php esc_html_e( 'Official Brand Colors', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="custom" <?php selected( $settings['color_scheme'], 'custom' ); ?>><?php esc_html_e( 'Custom Solid Colors', 'sharenivo-fast-social-sharing' ); ?></option>
-									</select>
-								</div>
+					<section class="sharenivo-panel" data-panel="follow" hidden>
+						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Audience growth', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Social follow profiles', 'sharenivo-fast-social-sharing' ); ?></h2><p><?php esc_html_e( 'Profile links are rendered locally through the Follow block, widget, shortcode, or action.', 'sharenivo-fast-social-sharing' ); ?></p></div></div>
+						<div class="sharenivo-card sharenivo-fields">
+							<?php self::render_toggle( 'sharenivo_settings[follow][enabled]', $settings['follow']['enabled'], __( 'Enable follow tools', 'sharenivo-fast-social-sharing' ) ); ?>
+							<div class="sharenivo-field"><label><?php esc_html_e( 'Heading', 'sharenivo-fast-social-sharing' ); ?><input type="text" name="sharenivo_settings[follow][heading]" value="<?php echo esc_attr( $settings['follow']['heading'] ); ?>"></label></div>
+							<div class="sharenivo-profile-grid">
+							<?php foreach ( $follow_networks as $network => $data ) : ?>
+								<label><span style="--network-color:<?php echo esc_attr( $data['color'] ); ?>"><?php echo wp_kses( Networks::get_icon( $network ), self::svg_allowed_html() ); ?></span><b><?php echo esc_html( $data['label'] ); ?></b><input type="url" name="sharenivo_settings[follow][profiles][<?php echo esc_attr( $network ); ?>]" value="<?php echo esc_attr( $settings['follow']['profiles'][ $network ] ?? '' ); ?>" placeholder="https://"></label>
+							<?php endforeach; ?>
 							</div>
-
-							<div class="sharenivo-field-row sharenivo-custom-color-row" style="<?php echo esc_attr( ( 'custom' !== $settings['color_scheme'] ) ? 'display:none;' : '' ); ?>">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Custom Colors', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<div class="sharenivo-color-row">
-										<input type="text" name="sharenivo_settings[custom_bg_color]" value="<?php echo esc_attr( $settings['custom_bg_color'] ); ?>" class="sharenivo-color-picker" data-default-color="#000000" />
-										<span class="sharenivo-unit"><?php esc_html_e( 'Background', 'sharenivo-fast-social-sharing' ); ?></span>
-									</div>
-									<div class="sharenivo-color-row" style="margin-top: 10px;">
-										<input type="text" name="sharenivo_settings[custom_icon_color]" value="<?php echo esc_attr( $settings['custom_icon_color'] ); ?>" class="sharenivo-color-picker" data-default-color="#ffffff" />
-										<span class="sharenivo-unit"><?php esc_html_e( 'Icon', 'sharenivo-fast-social-sharing' ); ?></span>
-									</div>
-									<div class="sharenivo-color-row" style="margin-top: 10px;">
-										<input type="text" name="sharenivo_settings[custom_hover_bg]" value="<?php echo esc_attr( $settings['custom_hover_bg'] ); ?>" class="sharenivo-color-picker" data-default-color="#434343" />
-										<span class="sharenivo-unit"><?php esc_html_e( 'Hover', 'sharenivo-fast-social-sharing' ); ?></span>
-									</div>
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Spacing', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Gap between and margins around.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control" style="display: flex; gap: 15px; flex-wrap: wrap;">
-									<div class="sharenivo-input-unit">
-										<input type="number" name="sharenivo_settings[button_gap]" value="<?php echo esc_attr( $settings['button_gap'] ); ?>" min="0" max="50" class="sharenivo-input sharenivo-input-number" />
-										<span class="sharenivo-unit">px Gap</span>
-									</div>
-									<div class="sharenivo-input-unit">
-										<input type="number" name="sharenivo_settings[margin_top]" value="<?php echo esc_attr( $settings['margin_top'] ); ?>" min="0" max="100" class="sharenivo-input sharenivo-input-number" />
-										<span class="sharenivo-unit">px Top</span>
-									</div>
-									<div class="sharenivo-input-unit">
-										<input type="number" name="sharenivo_settings[margin_bottom]" value="<?php echo esc_attr( $settings['margin_bottom'] ); ?>" min="0" max="100" class="sharenivo-input sharenivo-input-number" />
-										<span class="sharenivo-unit">px Bottom</span>
-									</div>
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Hover Animations', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Motion effects on interaction.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control" style="gap: 16px;">
-									<label class="sharenivo-toggle-wrap">
-										<div class="sharenivo-toggle">
-											<input type="checkbox" name="sharenivo_settings[enable_animations]" value="1" <?php checked( $settings['enable_animations'], true ); ?> />
-											<div class="sharenivo-toggle-slider"></div>
-										</div>
-										<span class="sharenivo-toggle-label"><?php esc_html_e( 'Enable CSS animations', 'sharenivo-fast-social-sharing' ); ?></span>
-									</label>
-									
-									<select name="sharenivo_settings[hover_animation]" class="sharenivo-select">
-										<option value="lift" <?php selected( $settings['hover_animation'], 'lift' ); ?>><?php esc_html_e( 'Lift (Move Up)', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="pulse" <?php selected( $settings['hover_animation'], 'pulse' ); ?>><?php esc_html_e( 'Pulse (Grow)', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="spin" <?php selected( $settings['hover_animation'], 'spin' ); ?>><?php esc_html_e( 'Spin (Rotate)', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="bounce" <?php selected( $settings['hover_animation'], 'bounce' ); ?>><?php esc_html_e( 'Bounce', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="flip" <?php selected( $settings['hover_animation'], 'flip' ); ?>><?php esc_html_e( 'Flip (3D)', 'sharenivo-fast-social-sharing' ); ?></option>
-									</select>
-								</div>
-							</div>
+							<p class="description"><?php esc_html_e( 'Use [sharenivo_follow] or the ShareNivo Follow widget. Empty profiles are never rendered.', 'sharenivo-fast-social-sharing' ); ?></p>
 						</div>
-					</div>
+					</section>
 
-					<!-- Advanced Tab -->
-					<div id="advanced" class="sharenivo-tab-content">
-						<div class="sharenivo-panel-header">
-							<div class="sharenivo-panel-icon">
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+					<section class="sharenivo-panel" data-panel="advanced" hidden>
+						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Rules and portability', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Advanced settings', 'sharenivo-fast-social-sharing' ); ?></h2></div></div>
+						<div class="sharenivo-card sharenivo-fields">
+							<h3><?php esc_html_e( 'Content types', 'sharenivo-fast-social-sharing' ); ?></h3><div class="sharenivo-checkbox-grid">
+							<?php foreach ( $post_types as $post_type ) : ?><label><input type="checkbox" name="sharenivo_settings[post_types][]" value="<?php echo esc_attr( $post_type->name ); ?>" <?php checked( in_array( $post_type->name, $settings['post_types'], true ) ); ?>> <?php echo esc_html( $post_type->labels->singular_name ); ?></label><?php endforeach; ?>
 							</div>
-							<div>
-								<h3 class="sharenivo-panel-title"><?php esc_html_e( 'Advanced Settings', 'sharenivo-fast-social-sharing' ); ?></h3>
-								<p class="sharenivo-panel-desc"><?php esc_html_e( 'Developer options and integrations.', 'sharenivo-fast-social-sharing' ); ?></p>
-							</div>
+							<?php self::render_toggle( 'sharenivo_settings[show_on_homepage]', $settings['show_on_homepage'], __( 'Allow automatic buttons on the front page', 'sharenivo-fast-social-sharing' ) ); ?>
+							<div class="sharenivo-field"><label><?php esc_html_e( 'Custom CSS', 'sharenivo-fast-social-sharing' ); ?><textarea name="sharenivo_settings[custom_css]" rows="8" placeholder=".sharenivo-share { }"><?php echo esc_textarea( $settings['custom_css'] ); ?></textarea></label></div>
+							<div class="sharenivo-portability"><div><label><?php esc_html_e( 'Export configuration', 'sharenivo-fast-social-sharing' ); ?><textarea class="sharenivo-export" rows="8" readonly><?php echo esc_textarea( wp_json_encode( $settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></textarea></label><button type="button" class="button sharenivo-copy-export"><?php esc_html_e( 'Copy JSON', 'sharenivo-fast-social-sharing' ); ?></button></div><div><label><?php esc_html_e( 'Import configuration', 'sharenivo-fast-social-sharing' ); ?><textarea name="sharenivo_import_json" rows="8" placeholder="{ }"></textarea></label><p class="description"><?php esc_html_e( 'Paste a ShareNivo 2.x JSON export. Imported values are validated before saving.', 'sharenivo-fast-social-sharing' ); ?></p></div></div>
 						</div>
-						
-						<div class="sharenivo-panel-body">
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Custom CSS', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Override default styles safely.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<textarea name="sharenivo_settings[custom_css]" rows="6" class="sharenivo-textarea" placeholder="/* Your CSS here */"><?php echo esc_textarea( $settings['custom_css'] ); ?></textarea>
-								</div>
-							</div>
+					</section>
 
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Share Counts', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Display number of shares.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<label class="sharenivo-toggle-wrap">
-										<div class="sharenivo-toggle">
-											<input type="checkbox" name="sharenivo_settings[show_share_counts]" value="1" <?php checked( $settings['show_share_counts'], true ); ?> />
-											<div class="sharenivo-toggle-slider"></div>
-										</div>
-										<span class="sharenivo-toggle-label"><?php esc_html_e( 'Fetch and display counts', 'sharenivo-fast-social-sharing' ); ?></span>
-									</label>
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Count Settings', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control" style="display: flex; gap: 15px; flex-wrap: wrap;">
-									<select name="sharenivo_settings[share_count_mode]" class="sharenivo-select" style="min-width: 150px;">
-										<option value="total" <?php selected( $settings['share_count_mode'], 'total' ); ?>><?php esc_html_e( 'Total sum', 'sharenivo-fast-social-sharing' ); ?></option>
-										<option value="network" <?php selected( $settings['share_count_mode'], 'network' ); ?>><?php esc_html_e( 'Per network', 'sharenivo-fast-social-sharing' ); ?></option>
-									</select>
-
-									<div class="sharenivo-input-unit">
-										<input type="number" name="sharenivo_settings[share_count_cache_ttl]" value="<?php echo esc_attr( $settings['share_count_cache_ttl'] ); ?>" min="5" max="1440" class="sharenivo-input sharenivo-input-number" />
-										<span class="sharenivo-unit">Min. Cache</span>
-									</div>
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'SharedCount API', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Optional: For networks without public endpoints.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<input type="text" name="sharenivo_settings[sharedcount_api_key]" value="<?php echo esc_attr( $settings['sharedcount_api_key'] ); ?>" class="sharenivo-input" placeholder="API Key" />
-								</div>
-							</div>
-
-							<div class="sharenivo-field-row">
-								<div class="sharenivo-field-label">
-									<span class="sharenivo-label-text"><?php esc_html_e( 'Shortcode', 'sharenivo-fast-social-sharing' ); ?></span>
-									<span class="sharenivo-label-hint"><?php esc_html_e( 'Manual placement.', 'sharenivo-fast-social-sharing' ); ?></span>
-								</div>
-								<div class="sharenivo-field-control">
-									<div class="sharenivo-shortcode-wrap">
-										<code id="sharenivo-shortcode-text">[sharenivo_share]</code>
-										<button type="button" class="sharenivo-btn sharenivo-btn-secondary sharenivo-copy-btn" data-clipboard-target="#sharenivo-shortcode-text">
-											<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-											<?php esc_html_e( 'Copy', 'sharenivo-fast-social-sharing' ); ?>
-										</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="sharenivo-form-footer">
-						<button type="submit" name="sharenivo_save_settings" class="sharenivo-btn sharenivo-btn-primary sharenivo-save-btn">
-							<svg class="sharenivo-btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-							<?php esc_html_e( 'Save Settings', 'sharenivo-fast-social-sharing' ); ?>
-							<svg class="sharenivo-spinner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
-						</button>
-					</div>
+					<footer class="sharenivo-savebar"><span class="sharenivo-savebar__message" role="status" aria-live="polite"></span><button type="submit" class="button button-primary sharenivo-save-button"><?php esc_html_e( 'Save ShareNivo settings', 'sharenivo-fast-social-sharing' ); ?></button></footer>
 				</form>
-				</main>
 			</div>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Save settings via AJAX.
+	 * AJAX settings save handler.
 	 */
 	public static function ajax_save_settings() {
-		$settings = new self();
-		$settings->save_settings( true );
+		check_ajax_referer( 'sharenivo_save_settings', 'sharenivo_settings_nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission to change these settings.', 'sharenivo-fast-social-sharing' ) ), 403 );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The full nested array is validated by sanitize_settings().
+		$input = isset( $_POST['sharenivo_settings'] ) && is_array( $_POST['sharenivo_settings'] ) ? wp_unslash( $_POST['sharenivo_settings'] ) : array();
+		$import_json = isset( $_POST['sharenivo_import_json'] ) ? sanitize_textarea_field( wp_unslash( $_POST['sharenivo_import_json'] ) ) : '';
+
+		if ( '' !== trim( $import_json ) ) {
+			$imported = json_decode( $import_json, true );
+			if ( ! is_array( $imported ) ) {
+				wp_send_json_error( array( 'message' => __( 'The import JSON is invalid.', 'sharenivo-fast-social-sharing' ) ), 400 );
+			}
+			$input = $imported;
+		}
+
+		$settings = self::sanitize_settings( $input );
+		update_option( 'sharenivo_settings', $settings, false );
+		update_option( 'sharenivo_schema_version', 2, false );
+
+		wp_send_json_success(
+			array(
+				'message' => __( 'Settings saved.', 'sharenivo-fast-social-sharing' ),
+				'export'  => wp_json_encode( $settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ),
+			)
+		);
 	}
 
 	/**
-	 * Save settings.
-	 *
-	 * @param bool $is_ajax Whether to return AJAX response.
+	 * Non-JavaScript settings save fallback.
 	 */
-	public function save_settings( $is_ajax = false ) {
-		$nonce = isset( $_POST['sharenivo_settings_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['sharenivo_settings_nonce'] ) ) : '';
-
-		// Verify nonce.
-		if ( ! wp_verify_nonce( $nonce, 'sharenivo_save_settings' ) ) {
-			if ( $is_ajax ) {
-				wp_send_json_error( array( 'message' => esc_html__( 'Security check failed', 'sharenivo-fast-social-sharing' ) ) );
-			}
-			wp_die( esc_html__( 'Security check failed', 'sharenivo-fast-social-sharing' ) );
-		}
-
-		// Check user permissions.
+	public static function save_settings_redirect() {
+		check_admin_referer( 'sharenivo_save_settings', 'sharenivo_settings_nonce' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			if ( $is_ajax ) {
-				wp_send_json_error( array( 'message' => esc_html__( 'You do not have permission to access this page.', 'sharenivo-fast-social-sharing' ) ) );
+			wp_die( esc_html__( 'You do not have permission to change these settings.', 'sharenivo-fast-social-sharing' ) );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The full nested array is validated below.
+		$input       = isset( $_POST['sharenivo_settings'] ) && is_array( $_POST['sharenivo_settings'] ) ? wp_unslash( $_POST['sharenivo_settings'] ) : array();
+		$import_json = isset( $_POST['sharenivo_import_json'] ) ? sanitize_textarea_field( wp_unslash( $_POST['sharenivo_import_json'] ) ) : '';
+		if ( '' !== trim( $import_json ) ) {
+			$imported = json_decode( $import_json, true );
+			if ( ! is_array( $imported ) ) {
+				wp_die( esc_html__( 'The import JSON is invalid.', 'sharenivo-fast-social-sharing' ) );
 			}
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'sharenivo-fast-social-sharing' ) );
+			$input = $imported;
 		}
 
-		$default_settings = self::get_default_settings();
-		$allowed_networks = array_keys( self::get_allowed_networks() );
-		$allowed_positions = array( 'floating_left', 'floating_right', 'inline_top', 'inline_bottom' );
-		$allowed_mobile_positions = array( 'sticky_bottom', 'inline', 'hidden' );
-		$allowed_shapes = array( 'circle', 'square', 'rounded', 'landscape', 'portrait', 'landscape_rectangle' );
-		$allowed_sizes = array( 'small', 'medium', 'large' );
-		$allowed_schemes = array( 'brand', 'custom' );
-		$allowed_animations = array( 'lift', 'pulse', 'spin', 'bounce', 'flip' );
-		$allowed_share_count_modes = array( 'total', 'network' );
-		$allowed_alignments = array( 'left', 'center', 'right' );
+		update_option( 'sharenivo_settings', self::sanitize_settings( $input ), false );
+		update_option( 'sharenivo_schema_version', 2, false );
+		wp_safe_redirect( add_query_arg( 'sharenivo-updated', '1', admin_url( 'options-general.php?page=sharenivo' ) ) );
+		exit;
+	}
 
-		$settings = array();
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-		if ( isset( $_POST['sharenivo_settings'] ) && is_array( $_POST['sharenivo_settings'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			$settings = wp_unslash( $_POST['sharenivo_settings'] );
-		}
-
-		$selected_networks = array();
-		if ( isset( $settings['networks'] ) && is_array( $settings['networks'] ) ) {
-			$selected_networks = array_intersect(
-				$allowed_networks,
-				array_map( 'sanitize_text_field', $settings['networks'] )
-			);
-		} else if ( isset( $_POST['sharenivo_save_settings'] ) ) {
-			// If form was submitted but no networks were selected, save an empty array rather than reverting to defaults.
-			$selected_networks = array();
-		} else {
-			$selected_networks = $default_settings['networks'];
-		}
-
-		$submitted_network_order = array();
-		if ( ! empty( $settings['network_order'] ) ) {
-			if ( is_array( $settings['network_order'] ) ) {
-				$submitted_network_order = array_map( 'sanitize_key', $settings['network_order'] );
-			} else {
-				$submitted_network_order = array_map(
-					'sanitize_key',
-					array_filter(
-						array_map( 'trim', explode( ',', sanitize_text_field( $settings['network_order'] ) ) )
-					)
-				);
+	/**
+	 * Count enabled locations.
+	 *
+	 * @param array $locations Locations.
+	 * @return int
+	 */
+	private static function count_active_locations( $locations ) {
+		$count = 0;
+		foreach ( $locations as $location ) {
+			if ( ! empty( $location['enabled'] ) ) {
+				++$count;
 			}
 		}
-		$selected_networks = self::sort_networks_by_order( $selected_networks, $submitted_network_order );
+		return $count;
+	}
 
-		$selected_post_types = array();
-		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
-		unset( $public_post_types['attachment'] );
-		if ( isset( $settings['post_types'] ) && is_array( $settings['post_types'] ) ) {
-			$selected_post_types = array_intersect(
-				array_values( $public_post_types ),
-				array_map( 'sanitize_text_field', $settings['post_types'] )
-			);
-		}
-		if ( empty( $selected_post_types ) ) {
-			$selected_post_types = $default_settings['post_types'];
-		}
+	/**
+	 * Render a toggle control.
+	 *
+	 * @param string $name    Field name.
+	 * @param bool   $checked Checked state.
+	 * @param string $label   Label.
+	 */
+	private static function render_toggle( $name, $checked, $label ) {
+		?>
+		<label class="sharenivo-toggle"><input type="checkbox" name="<?php echo esc_attr( $name ); ?>" value="1" <?php checked( $checked ); ?>><span aria-hidden="true"></span><b><?php echo esc_html( $label ); ?></b></label>
+		<?php
+	}
 
-		$position = sanitize_text_field( $settings['position'] ?? $default_settings['position'] );
-		if ( ! in_array( $position, $allowed_positions, true ) ) {
-			$position = $default_settings['position'];
-		}
+	/**
+	 * Render a select field.
+	 *
+	 * @param string $label   Label.
+	 * @param string $name    Field name.
+	 * @param string $value   Current value.
+	 * @param array  $options Options.
+	 */
+	private static function render_select_field( $label, $name, $value, $options ) {
+		?>
+		<div class="sharenivo-field"><label><?php echo esc_html( $label ); ?><select name="<?php echo esc_attr( $name ); ?>"><?php foreach ( $options as $option => $option_label ) : ?><option value="<?php echo esc_attr( $option ); ?>" <?php selected( $value, $option ); ?>><?php echo esc_html( $option_label ); ?></option><?php endforeach; ?></select></label></div>
+		<?php
+	}
 
-		$mobile_position = sanitize_text_field( $settings['mobile_position'] ?? $default_settings['mobile_position'] );
-		if ( ! in_array( $mobile_position, $allowed_mobile_positions, true ) ) {
-			$mobile_position = $default_settings['mobile_position'];
-		}
+	/**
+	 * Render one location configuration card.
+	 *
+	 * @param string $key      Location key.
+	 * @param string $title    Card title.
+	 * @param string $summary  Card summary.
+	 * @param array  $settings Settings.
+	 */
+	private static function render_location_card( $key, $title, $summary, $settings ) {
+		$value = $settings['locations'][ $key ];
+		?>
+		<article class="sharenivo-location-card<?php echo esc_attr( ! empty( $value['enabled'] ) ? ' is-enabled' : '' ); ?>" data-location-card="<?php echo esc_attr( $key ); ?>">
+			<header><div><span class="sharenivo-location-card__number"><?php echo esc_html( strtoupper( substr( $key, 0, 2 ) ) ); ?></span><h3><?php echo esc_html( $title ); ?></h3></div><?php self::render_toggle( 'sharenivo_settings[locations][' . $key . '][enabled]', ! empty( $value['enabled'] ), __( 'Enabled', 'sharenivo-fast-social-sharing' ) ); ?></header>
+			<p><?php echo esc_html( $summary ); ?></p><div class="sharenivo-location-card__settings">
+			<?php if ( 'floating' === $key ) : ?>
+				<?php self::render_select_field( __( 'Side', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][floating][side]', $value['side'], array( 'left' => __( 'Left', 'sharenivo-fast-social-sharing' ), 'right' => __( 'Right', 'sharenivo-fast-social-sharing' ) ) ); ?>
+				<div class="sharenivo-field"><label><?php esc_html_e( 'Vertical position (%)', 'sharenivo-fast-social-sharing' ); ?><input type="number" min="10" max="90" name="sharenivo_settings[locations][floating][vertical]" value="<?php echo esc_attr( $value['vertical'] ); ?>"></label></div>
+				<?php self::render_toggle( 'sharenivo_settings[locations][floating][hide_mobile]', $value['hide_mobile'], __( 'Hide rail on mobile', 'sharenivo-fast-social-sharing' ) ); ?>
+			<?php elseif ( 'inline' === $key ) : ?>
+				<?php self::render_select_field( __( 'Content position', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][inline][position]', $value['position'], array( 'top' => __( 'Above', 'sharenivo-fast-social-sharing' ), 'bottom' => __( 'Below', 'sharenivo-fast-social-sharing' ), 'both' => __( 'Above and below', 'sharenivo-fast-social-sharing' ) ) ); ?>
+				<?php self::render_select_field( __( 'Alignment', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][inline][alignment]', $value['alignment'], array( 'left' => __( 'Left', 'sharenivo-fast-social-sharing' ), 'center' => __( 'Center', 'sharenivo-fast-social-sharing' ), 'right' => __( 'Right', 'sharenivo-fast-social-sharing' ) ) ); ?>
+			<?php elseif ( 'sticky' === $key ) : ?>
+				<?php self::render_select_field( __( 'Bar width', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][sticky][width]', $value['width'], array( 'compact' => __( 'Fit buttons', 'sharenivo-fast-social-sharing' ), 'full' => __( 'Full screen', 'sharenivo-fast-social-sharing' ) ) ); ?>
+				<?php self::render_select_field( __( 'Bar alignment', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][sticky][alignment]', $value['alignment'], array( 'left' => __( 'Left', 'sharenivo-fast-social-sharing' ), 'center' => __( 'Center', 'sharenivo-fast-social-sharing' ), 'right' => __( 'Right', 'sharenivo-fast-social-sharing' ) ) ); ?>
+				<p class="description"><?php esc_html_e( 'Alignment positions a fitted bar. Full-screen bars use equal responsive columns and wrap when needed instead of scrolling.', 'sharenivo-fast-social-sharing' ); ?></p>
+			<?php elseif ( in_array( $key, array( 'popup', 'flyin' ), true ) ) : ?>
+				<div class="sharenivo-field"><label><?php esc_html_e( 'Title', 'sharenivo-fast-social-sharing' ); ?><input type="text" name="sharenivo_settings[locations][<?php echo esc_attr( $key ); ?>][title]" value="<?php echo esc_attr( $value['title'] ); ?>"></label></div>
+				<div class="sharenivo-field"><label><?php esc_html_e( 'Message', 'sharenivo-fast-social-sharing' ); ?><textarea rows="3" name="sharenivo_settings[locations][<?php echo esc_attr( $key ); ?>][message]"><?php echo esc_textarea( $value['message'] ); ?></textarea></label></div>
+				<?php if ( 'flyin' === $key ) { self::render_select_field( __( 'Corner', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][flyin][side]', $value['side'], array( 'left' => __( 'Bottom left', 'sharenivo-fast-social-sharing' ), 'right' => __( 'Bottom right', 'sharenivo-fast-social-sharing' ) ) ); } ?>
+				<?php self::render_select_field( __( 'Trigger', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][' . $key . '][trigger]', $value['trigger'], array( 'delay' => __( 'Time delay', 'sharenivo-fast-social-sharing' ), 'scroll' => __( 'Scroll percentage', 'sharenivo-fast-social-sharing' ), 'bottom' => __( 'Bottom of content', 'sharenivo-fast-social-sharing' ), 'inactivity' => __( 'Inactivity', 'sharenivo-fast-social-sharing' ), 'exit' => __( 'Desktop exit intent', 'sharenivo-fast-social-sharing' ), 'comment' => __( 'After commenting', 'sharenivo-fast-social-sharing' ), 'purchase' => __( 'After WooCommerce purchase', 'sharenivo-fast-social-sharing' ) ) ); ?>
+				<div class="sharenivo-field"><label><?php esc_html_e( 'Trigger value', 'sharenivo-fast-social-sharing' ); ?><input type="number" min="1" max="600" name="sharenivo_settings[locations][<?php echo esc_attr( $key ); ?>][trigger_value]" value="<?php echo esc_attr( $value['trigger_value'] ); ?>"><small><?php esc_html_e( 'Seconds for delay/inactivity, percentage for scroll.', 'sharenivo-fast-social-sharing' ); ?></small></label></div>
+				<?php self::render_select_field( __( 'Frequency', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][' . $key . '][frequency]', $value['frequency'], array( 'always' => __( 'Every page view', 'sharenivo-fast-social-sharing' ), 'session' => __( 'Once per session', 'sharenivo-fast-social-sharing' ), 'day' => __( 'Once per day', 'sharenivo-fast-social-sharing' ), 'week' => __( 'Once per week', 'sharenivo-fast-social-sharing' ) ) ); ?>
+			<?php elseif ( 'media' === $key ) : ?>
+				<div class="sharenivo-field"><label><?php esc_html_e( 'Minimum image width (px)', 'sharenivo-fast-social-sharing' ); ?><input type="number" min="120" max="1200" name="sharenivo_settings[locations][media][min_width]" value="<?php echo esc_attr( $value['min_width'] ); ?>"></label></div>
+				<div class="sharenivo-checkbox-grid"><?php foreach ( array( 'pinterest', 'facebook', 'x', 'copy' ) as $network ) : ?><label><input type="checkbox" name="sharenivo_settings[locations][media][networks][]" value="<?php echo esc_attr( $network ); ?>" <?php checked( in_array( $network, $value['networks'], true ) ); ?>> <?php echo esc_html( Networks::get_share_networks()[ $network ]['label'] ); ?></label><?php endforeach; ?></div>
+			<?php else : ?>
+				<p class="description"><?php esc_html_e( 'Uses the global network and design settings.', 'sharenivo-fast-social-sharing' ); ?></p>
+			<?php endif; ?>
+			</div>
+		</article>
+		<?php
+	}
 
-		$button_shape = sanitize_text_field( $settings['button_shape'] ?? $default_settings['button_shape'] );
-		if ( in_array( $button_shape, array( 'portrait', 'landscape_rectangle' ), true ) ) {
-			$button_shape = 'landscape';
-		}
-		if ( ! in_array( $button_shape, $allowed_shapes, true ) ) {
-			$button_shape = $default_settings['button_shape'];
-		}
-
-		$button_size = sanitize_text_field( $settings['button_size'] ?? $default_settings['button_size'] );
-		if ( ! in_array( $button_size, $allowed_sizes, true ) ) {
-			$button_size = $default_settings['button_size'];
-		}
-
-		$color_scheme = sanitize_text_field( $settings['color_scheme'] ?? $default_settings['color_scheme'] );
-		if ( ! in_array( $color_scheme, $allowed_schemes, true ) ) {
-			$color_scheme = $default_settings['color_scheme'];
-		}
-
-		$hover_animation = sanitize_text_field( $settings['hover_animation'] ?? $default_settings['hover_animation'] );
-		if ( ! in_array( $hover_animation, $allowed_animations, true ) ) {
-			$hover_animation = $default_settings['hover_animation'];
-		}
-
-		$share_count_mode = sanitize_text_field( $settings['share_count_mode'] ?? $default_settings['share_count_mode'] );
-		if ( ! in_array( $share_count_mode, $allowed_share_count_modes, true ) ) {
-			$share_count_mode = $default_settings['share_count_mode'];
-		}
-
-		$inline_alignment = sanitize_text_field( $settings['inline_alignment'] ?? 'left' );
-		if ( ! in_array( $inline_alignment, $allowed_alignments, true ) ) {
-			$inline_alignment = 'left';
-		}
-
-		$custom_bg_color = sanitize_hex_color( $settings['custom_bg_color'] ?? $default_settings['custom_bg_color'] );
-		if ( empty( $custom_bg_color ) ) {
-			$custom_bg_color = $default_settings['custom_bg_color'];
-		}
-
-		$custom_icon_color = sanitize_hex_color( $settings['custom_icon_color'] ?? $default_settings['custom_icon_color'] );
-		if ( empty( $custom_icon_color ) ) {
-			$custom_icon_color = $default_settings['custom_icon_color'];
-		}
-
-		$custom_hover_bg = sanitize_hex_color( $settings['custom_hover_bg'] ?? $default_settings['custom_hover_bg'] );
-		if ( empty( $custom_hover_bg ) ) {
-			$custom_hover_bg = $default_settings['custom_hover_bg'];
-		}
-
-		$sanitized = array(
-			'enabled'            => isset( $settings['enabled'] ) ? true : false,
-			'networks'           => array_values( $selected_networks ),
-			'network_order'      => array_values( $selected_networks ),
-			'post_types'         => array_values( $selected_post_types ),
-			'show_on_homepage'   => isset( $settings['show_on_homepage'] ) ? true : false,
-			'auto_detect_post_types' => isset( $settings['auto_detect_post_types'] ) ? true : false,
-			'position'           => $position,
-			'mobile_position'    => $mobile_position,
-			'button_shape'       => $button_shape,
-			'button_size'        => $button_size,
-			'show_more_network_button' => isset( $settings['show_more_network_button'] ) ? true : false,
-			'color_scheme'       => $color_scheme,
-			'hover_animation'    => $hover_animation,
-			'custom_bg_color'    => $custom_bg_color,
-			'custom_icon_color'  => $custom_icon_color,
-			'custom_hover_bg'    => $custom_hover_bg,
-			'button_gap'         => min( 50, absint( $settings['button_gap'] ?? $default_settings['button_gap'] ) ),
-			'margin_top'         => min( 100, absint( $settings['margin_top'] ?? $default_settings['margin_top'] ) ),
-			'margin_bottom'      => min( 100, absint( $settings['margin_bottom'] ?? $default_settings['margin_bottom'] ) ),
-			'enable_animations'  => isset( $settings['enable_animations'] ) ? true : false,
-			'show_share_counts'  => isset( $settings['show_share_counts'] ) ? true : false,
-			'share_count_mode'   => $share_count_mode,
-			'share_count_cache_ttl' => max( 5, min( 1440, absint( $settings['share_count_cache_ttl'] ?? $default_settings['share_count_cache_ttl'] ) ) ),
-			'sharedcount_api_key' => sanitize_text_field( $settings['sharedcount_api_key'] ?? '' ),
-			'custom_css'         => sanitize_textarea_field( $settings['custom_css'] ?? '' ),
-			'inline_alignment'   => $inline_alignment,
+	/**
+	 * Allowed markup for local SVG icons in admin.
+	 *
+	 * @return array
+	 */
+	private static function svg_allowed_html() {
+		return array(
+			'svg'  => array( 'viewbox' => true, 'aria-hidden' => true, 'focusable' => true ),
+			'path' => array( 'd' => true ),
+			'circle' => array( 'cx' => true, 'cy' => true, 'r' => true ),
 		);
-
-		update_option( 'sharenivo_settings', $sanitized );
-
-		if ( $is_ajax ) {
-			wp_send_json_success( array( 'message' => esc_html__( 'Settings saved successfully.', 'sharenivo-fast-social-sharing' ) ) );
-		} else {
-			// Show success message.
-			add_settings_error(
-				'sharenivo_messages',
-				'sharenivo_message',
-				__( 'Settings saved successfully.', 'sharenivo-fast-social-sharing' ),
-				'updated'
-			);
-
-			settings_errors( 'sharenivo_messages' );
-		}
 	}
 }

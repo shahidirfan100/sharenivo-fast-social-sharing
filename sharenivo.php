@@ -1,12 +1,13 @@
 <?php
 /**
  * Plugin Name:       ShareNivo - Fast Social Sharing
- * Description:       Lightweight, performant social sharing buttons for WordPress. GDPR compliant with responsive design (floating sidebar on desktop, sticky bottom bar on mobile).
- * Version:           1.4.1
+ * Plugin URI:        https://wordpress.org/plugins/sharenivo-fast-social-sharing/
+ * Description:       Fast, privacy-first social sharing and follow buttons with multiple placements, smart triggers, and no tracking or external API requests.
+ * Version:           2.0.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Shahid Irfan
- * Author URI:        https://wordpress.org/
+ * Author URI:        https://profiles.wordpress.org/shahidirfan100/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       sharenivo-fast-social-sharing
@@ -23,7 +24,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Current plugin version.
  */
-define( 'SHARENIVO_VERSION', '1.4.1' );
+define( 'SHARENIVO_VERSION', '2.0.0' );
+
+/**
+ * Stored settings schema version.
+ */
+define( 'SHARENIVO_SCHEMA_VERSION', 2 );
 
 /**
  * Main plugin file.
@@ -44,6 +50,8 @@ define( 'SHARENIVO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
  * The code that runs during plugin activation.
  */
 function sharenivo_activate_plugin() {
+	require_once SHARENIVO_PLUGIN_DIR . 'includes/class-networks.php';
+	require_once SHARENIVO_PLUGIN_DIR . 'includes/admin/class-settings.php';
 	require_once SHARENIVO_PLUGIN_DIR . 'includes/class-activator.php';
 	ShareNivo\Activator::activate();
 }

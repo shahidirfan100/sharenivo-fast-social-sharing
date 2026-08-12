@@ -1,127 +1,112 @@
 === ShareNivo - Fast Social Sharing ===
-Contributors: ShareNivo
-Tags: social share, share buttons, social media, gdpr, shortcode
+Contributors: shahidirfan100
+Tags: social share, share buttons, social media, privacy, lightweight
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.4.1
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Lightweight social sharing buttons for WordPress with responsive layouts, privacy-first design, and flexible styling options.
+Fast, privacy-first social sharing and follow tools with flexible placements, smart local triggers, and zero automatic external requests.
 
 == Description ==
 
-ShareNivo adds clean, fast social sharing buttons to posts and pages. It uses locally loaded CSS and JavaScript, has no third-party tracking scripts, and keeps share-count requests disabled unless you explicitly enable them.
+ShareNivo adds polished social sharing without loading social SDKs, remote fonts, tracking pixels, analytics beacons, or share-count APIs. Its frontend uses one local stylesheet and one small local script, loaded only when ShareNivo can produce output.
 
-Features:
-* Lightweight frontend CSS and JavaScript with no third-party tracking scripts.
-* Privacy-friendly sharing links (no tracking cookies).
-* Desktop and mobile display positions.
-* Custom shape, size, spacing, colors, and multiple hover animations.
-* Shortcode support: `[sharenivo_share]`.
-* Action support: `do_action( 'sharenivo_display_buttons' )`.
-* Filters for developers: `sharenivo_settings`, `sharenivo_networks`, `sharenivo_button_html`.
-* Native Gutenberg block with live preview.
-* Share count display with cached fetches.
-* Extended network support: Threads, Bluesky, Telegram, Reddit.
-* Auto-detects newly registered public custom post types.
+= ShareNivo 2.0 features =
 
-Existing ShareNova settings, hooks, shortcodes, filters, and block content remain supported during the rebrand migration.
+* Active browser-sharing options: Facebook, X, LinkedIn, WhatsApp, Pinterest, Threads, Bluesky, Telegram, Reddit, Email, and Copy Link.
+* Floating desktop rail, inline buttons, mobile sticky bar, popup, fly-in, and image sharing.
+* Local triggers for delay, scroll depth, reading completion, inactivity, desktop exit intent, comments, and WooCommerce order confirmation.
+* Frequency controls stored in the visitor's browser with no server call.
+* Follow profiles for active social and creator platforms.
+* Original ShareNivo deep-plum and vivid-coral design system with network, brand, and minimal color modes.
+* Shape, size, spacing, labels, button order, hover, and entrance controls.
+* Accessible keyboard navigation, visible focus, dialog semantics, live copy feedback, and reduced-motion support.
+* Per-post placement overrides.
+* Share and Follow blocks, shortcodes, widgets, actions, and filters.
+* Validated JSON import/export.
+* Upgrade migration for existing ShareNivo and ShareNova settings and integrations.
+
+Share counts were removed in 2.0. They require external requests, add latency, and are increasingly unavailable or inconsistent across social platforms.
 
 == External services ==
 
-This plugin connects to external APIs to fetch public share counts for your content.
+ShareNivo makes no automatic requests to external services and does not send analytics or visitor data. When a visitor deliberately clicks a share button, their browser opens that network's official sharing page and sends the current page URL and, where supported, its title or selected image. That interaction is governed by the selected network's terms and privacy policy.
 
-* **Reddit API:** When the Reddit network is enabled, the plugin connects to `https://www.reddit.com/api/info.json` to fetch the social share count. It sends the current page's URL. [Reddit Privacy Policy](https://www.reddit.com/policies/privacy-policy)
-* **SharedCount API:** When enabled in the advanced settings, the plugin connects to `https://api.sharedcount.com/v1.0/` for multi-network share counts. It sends the current page URL and the API Key you provide. [SharedCount Privacy Policy](https://www.sharedcount.com/privacy)
+Supported destinations and their policies:
+
+* Facebook: [Terms](https://www.facebook.com/terms.php), [Privacy Policy](https://www.facebook.com/privacy/policy/)
+* X: [Terms](https://x.com/en/tos), [Privacy Policy](https://x.com/en/privacy)
+* LinkedIn: [User Agreement](https://www.linkedin.com/legal/user-agreement), [Privacy Policy](https://www.linkedin.com/legal/privacy-policy)
+* WhatsApp: [Terms](https://www.whatsapp.com/legal/terms-of-service), [Privacy Policy](https://www.whatsapp.com/legal/privacy-policy)
+* Pinterest: [Terms](https://policy.pinterest.com/terms-of-service), [Privacy Policy](https://policy.pinterest.com/privacy-policy)
+* Threads: [Terms](https://help.instagram.com/769983657850450), [Meta Privacy Policy](https://www.facebook.com/privacy/policy/)
+* Bluesky: [Terms](https://bsky.social/about/support/tos), [Privacy Policy](https://bsky.social/about/support/privacy-policy)
+* Telegram: [Terms](https://telegram.org/tos), [Privacy Policy](https://telegram.org/privacy)
+* Reddit: [User Agreement](https://redditinc.com/policies/user-agreement), [Privacy Policy](https://reddit.com/policies/privacy-policy)
+
+Email uses the visitor's configured mail application. Copy Link stays in the browser.
 
 == Installation ==
 
-1. Upload the `sharenivo` folder to `/wp-content/plugins/`.
-2. Activate the plugin from the Plugins screen in WordPress.
-3. Go to **Settings > Social Share** and configure options.
+1. Upload the `sharenivo-fast-social-sharing` folder to `/wp-content/plugins/`, or install the ZIP from Plugins > Add New > Upload Plugin.
+2. Activate ShareNivo from the Plugins screen.
+3. Open Settings > ShareNivo.
+4. Select networks, placements, and design options, then save.
 
 == Frequently Asked Questions ==
 
-= Does this plugin load external scripts? =
+= Does ShareNivo make frontend API requests? =
 
-No third-party scripts are loaded. Share links open the selected social network URL directly. If share counts are enabled, the documented count providers are contacted and responses are cached.
+No. ShareNivo does not fetch counts, load social SDKs, download fonts, or send analytics. A network is contacted only after a visitor clicks its share link.
 
-= How can I place buttons manually? =
+= Why are share counts gone? =
 
-Use `[sharenivo_share]` in post content or call `do_action( 'sharenivo_display_buttons' )` in templates.
+Most networks no longer provide reliable public counters. Fetching counts adds latency, caching work, failure modes, and privacy disclosures. ShareNivo 2.0 prioritizes speed and predictable output.
 
-= Can I customize styling? =
+= How can I place sharing manually? =
 
-Yes. Use built-in style settings and optional custom CSS.
+Use `[sharenivo_share]`, add the ShareNivo Share Buttons block, or call `do_action( 'sharenivo_display_buttons' )` in a theme template.
+
+= How can I display follow links? =
+
+Configure profiles on the Follow tab, then use `[sharenivo_follow]`, the ShareNivo Follow Links block, the ShareNivo Follow widget, or `do_action( 'sharenivo_display_follow' )`.
+
+= Does it support existing ShareNova content? =
+
+Yes. Legacy settings, the `[sharenova_share]` shortcode, the `sharenova_display_buttons` action, compatibility filters, and the original block name continue to work.
+
+= Does ShareNivo respect accessibility preferences? =
+
+Yes. Controls have accessible names and focus states, popup focus is contained, Escape closes transient interfaces, status messages use live regions, and motion is minimized when the operating system requests reduced motion.
 
 == Changelog ==
 
+= 2.0.0 =
+* Rebuilt the frontend as a zero-request, privacy-first placement engine.
+* Removed share counts, count caches, API keys, count endpoints, and all related admin controls.
+* Added floating, inline, mobile sticky, popup, fly-in, and image-sharing locations.
+* Added delay, scroll, bottom-of-content, inactivity, exit-intent, comment, and purchase triggers using local browser logic.
+* Added session, daily, and weekly prompt frequency controls without tracking requests.
+* Added Share and Follow blocks, follow shortcode, follow widget, and follow action.
+* Added per-post location overrides and validated settings portability.
+* Added Threads, Bluesky, and current network-browser share flows while removing obsolete integrations.
+* Introduced the original ShareNivo plum/coral dashboard and button design system.
+* Preserved selected button shapes and labels across desktop, tablet, and mobile layouts.
+* Standardized labeled button dimensions so short and long network names render at equal sizes.
+* Added compact/full-width mobile sticky layouts with left, center, and right alignment controls.
+* Made full-width sticky buttons use responsive equal columns without horizontal scrolling or oversized empty gaps.
+* Refined the dashboard and default brand treatment with a prominent deep-plum and vivid-coral palette.
+* Added conditional assets, keyboard-safe dialogs, live copy feedback, and reduced-motion support.
+* Preserved existing ShareNivo and ShareNova settings and developer integrations.
+
 = 1.4.1 =
-* Refined the ShareNivo admin dashboard with an original branded workspace layout, clearer hierarchy, responsive navigation, and focused controls.
-* Fixed Plugin Check issues for line endings, current WordPress compatibility metadata, and discouraged translation loading.
-* Kept the lowercase `sharenivo` text domain and all legacy ShareNova integrations intact for safe upgrades.
-
-= 1.4.0 =
-* Rebranded the plugin as ShareNivo with updated metadata, namespace, text domain, assets, and documentation.
-* Added migration for existing ShareNova settings and preserved legacy hooks, shortcode, filters, and block rendering.
-* Refined the admin dashboard with a local system font stack, safer AJAX notices, improved tab handling, and corrected network chip interactions.
-* Removed the remote admin font request to keep the dashboard lightweight and privacy-friendly.
-
-= 1.3.1 =
-* Fixed fatal error on activation by correcting plugin constant names
-* Fixed X (Twitter) and Bluesky SVG icon rendering issues
-* Added Left, Center, and Right alignment options for inline positioned buttons
-* Adjusted hook priorities so inline bottom buttons display correctly before related post widgets
-
-= 1.3.0 =
-* Completely redesigned admin settings dashboard with a modern UI.
-* Premium dark-accent and glass card layout for improved user experience.
-* Upgraded CSS and JavaScript framework for smooth interactions and animations.
-
-= 1.2.0 =
-* Replaced portrait rectangle with landscape rectangle button shape option.
-* Added compact icon-only More button with automatic hide at 4 or fewer networks.
-* Added setting to show/hide More button behavior when more than 4 networks are selected.
-* Added admin network ordering with up/down controls.
-* Added frontend toggle script for More networks panel.
-
-= 1.1.0 =
-* Added native Gutenberg block with live preview.
-* Added share count display (total/per-network) with transient caching.
-* Added Threads, Bluesky, Telegram, and Reddit share buttons.
-* Added multiple hover animation styles.
-* Added automatic detection of newly registered public custom post types.
-* Added optional SharedCount API integration for broader count coverage.
-
-= 1.0.1 =
-* Added WordPress.org-ready readme and license packaging.
-* Applied saved style settings (spacing, custom colors, animation toggle) on frontend.
-* Added runtime support for documented action/filter APIs.
-* Hardened settings sanitization and nonce handling.
-* Improved i18n textdomain loading and mobile sticky CSS behavior.
-* Removed full object cache flush on uninstall.
-
-= 1.0.0 =
-* Initial release.
+* Refined the ShareNivo admin dashboard and WordPress.org metadata.
+* Preserved ShareNova upgrade compatibility.
 
 == Upgrade Notice ==
 
-= 1.4.1 =
-Recommended update for the refreshed admin experience and WordPress Plugin Check compatibility fixes.
-
-= 1.4.0 =
-ShareNivo is a compatibility-preserving rebrand with a refined, lighter admin experience. Existing ShareNova settings and integrations are migrated automatically.
-
-= 1.3.1 =
-Important bug fixes resolving a fatal activation conflict and several styling/alignment issues.
-
-= 1.3.0 =
-Major admin dashboard redesign with a fully modern user experience. Update recommended for better configuration workflow.
-
-= 1.2.0 =
-Recommended update for landscape shape, compact More button controls, and network ordering.
-
-= 1.1.0 =
-Recommended update for new share/count/block features and improved CPT handling.
+= 2.0.0 =
+Major privacy and performance release. Share-count requests and related settings are removed; existing placement, network, styling, shortcode, action, filter, and block integrations are migrated where possible.

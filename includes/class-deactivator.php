@@ -19,14 +19,9 @@ class Deactivator {
 	/**
 	 * Deactivate the plugin.
 	 *
-	 * Clear transients.
+	 * ShareNivo has no scheduled jobs or remote-request caches to clear.
 	 */
 	public static function deactivate() {
-		// Clear any transients.
-		delete_transient( 'sharenivo_share_counts' );
-		delete_transient( 'sharenova_share_counts' );
-
-		// Note: We do NOT delete settings on deactivation.
-		// Settings are only deleted on uninstall.
+		// Settings are intentionally retained. Uninstall performs cleanup.
 	}
 }

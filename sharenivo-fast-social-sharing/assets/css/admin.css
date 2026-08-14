@@ -1,4 +1,4 @@
-/* ShareNivo 2.0 admin — original violet/coral design system. */
+/* ShareNivo 2.1 admin — original violet/coral design system. */
 .settings_page_sharenivo #wpcontent { background: #f6f2f0; }
 .sharenivo-admin {
 	--sn-admin-brand: #ee5143;
@@ -186,6 +186,15 @@
 .sharenivo-preview__buttons i.is-x { --sn-preview-color: #111; }
 .sharenivo-preview__buttons i.is-linkedin { --sn-preview-color: #0a66c2; }
 .sharenivo-preview__buttons svg { width: 21px; height: 21px; fill: currentColor; }
+.sharenivo-preview-hover--lift i:hover { transform: translateY(-3px); }
+.sharenivo-preview-hover--grow i:hover { transform: scale(1.08); }
+.sharenivo-preview-hover--slide i:hover svg { transform: translateX(2px); }
+.sharenivo-preview-hover--glow i:hover { filter: brightness(1.08) drop-shadow(0 0 8px var(--sn-preview-color)); }
+.sharenivo-preview-hover--tilt i:hover { transform: translateY(-2px) rotate(-4deg); }
+.sharenivo-preview-hover--pulse i:hover { animation: sharenivo-preview-pulse .48s ease both; }
+.sharenivo-preview-hover--twist i:hover svg { transform: rotate(14deg) scale(1.08); }
+.sharenivo-preview__buttons svg { transition: transform .18s ease; }
+@keyframes sharenivo-preview-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
 .sharenivo-profile-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .sharenivo-profile-grid label { grid-template-columns: 34px 90px 1fr; align-items: center; padding: 9px; border: 1px solid var(--sn-admin-border); border-radius: 10px; }
@@ -236,4 +245,13 @@
 	.sharenivo-master-card { align-items: flex-start; flex-direction: column; }
 	.sharenivo-color-fields { grid-template-columns: 1fr; }
 	.sharenivo-savebar { padding: 13px 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sharenivo-admin,
+	.sharenivo-admin * {
+		animation-duration: .01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: .01ms !important;
+	}
 }

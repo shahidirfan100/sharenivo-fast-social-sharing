@@ -1,4 +1,4 @@
-# ShareNivo 2.0.0
+# ShareNivo 2.1.0
 
 ShareNivo is a privacy-first WordPress social sharing and follow plugin. It provides flexible placements through original ShareNivo code and design, without social SDKs, analytics beacons, remote assets, or share-count requests.
 
@@ -95,12 +95,4 @@ Only built-in network keys are accepted. This keeps URL generation, sanitization
 
 ## Upgrade compatibility
 
-Version 2.0 migrates 1.x options into a nested schema. It preserves the legacy ShareNova option, shortcode, display action, network/settings/button filters, and `wssp/share-buttons` block name. Share-count settings are deliberately discarded.
-
-## Uninstall
-
-Uninstalling from the WordPress Plugins screen removes ShareNivo options and per-post overrides. Deactivation keeps configuration intact.
-
-## License
-
-GPL-2.0-or-later. See `license.txt`.
+Version 2.0 migrates 1.x options into a neste

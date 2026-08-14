@@ -4,7 +4,7 @@ Tags: social share, share buttons, social media, privacy, lightweight
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,7 @@ Fast, privacy-first social sharing and follow tools with flexible placements, sm
 
 ShareNivo adds polished social sharing without loading social SDKs, remote fonts, tracking pixels, analytics beacons, or share-count APIs. Its frontend uses one local stylesheet and one small local script, loaded only when ShareNivo can produce output.
 
-= ShareNivo 2.0 features =
+= ShareNivo 2.1 features =
 
 * Active browser-sharing options: Facebook, X, LinkedIn, WhatsApp, Pinterest, Threads, Bluesky, Telegram, Reddit, Email, and Copy Link.
 * Floating desktop rail, inline buttons, mobile sticky bar, popup, fly-in, and image sharing.
@@ -22,7 +22,7 @@ ShareNivo adds polished social sharing without loading social SDKs, remote fonts
 * Frequency controls stored in the visitor's browser with no server call.
 * Follow profiles for active social and creator platforms.
 * Original ShareNivo deep-plum and vivid-coral design system with network, brand, and minimal color modes.
-* Shape, size, spacing, labels, button order, hover, and entrance controls.
+* Shape, size, spacing, labels, button order, eight hover choices, and entrance controls.
 * Accessible keyboard navigation, visible focus, dialog semantics, live copy feedback, and reduced-motion support.
 * Per-post placement overrides.
 * Share and Follow blocks, shortcodes, widgets, actions, and filters.
@@ -56,6 +56,14 @@ Email uses the visitor's configured mail application. Copy Link stays in the bro
 3. Open Settings > ShareNivo.
 4. Select networks, placements, and design options, then save.
 
+== Screenshots ==
+
+1. Overview dashboard with active networks, enabled placements, tracking-request status, and the master switch.
+2. Current sharing-network selector and deterministic display-order controls.
+3. Placement controls for floating, inline, mobile sticky, popup, fly-in, and image sharing.
+4. Button design, color, motion, labels, spacing, and live-preview controls.
+5. Responsive inline and full-width mobile sticky buttons with equal columns and no horizontal scrolling.
+
 == Frequently Asked Questions ==
 
 = Does ShareNivo make frontend API requests? =
@@ -64,7 +72,7 @@ No. ShareNivo does not fetch counts, load social SDKs, download fonts, or send a
 
 = Why are share counts gone? =
 
-Most networks no longer provide reliable public counters. Fetching counts adds latency, caching work, failure modes, and privacy disclosures. ShareNivo 2.0 prioritizes speed and predictable output.
+Most networks no longer provide reliable public counters. Fetching counts adds latency, caching work, failure modes, and privacy disclosures. ShareNivo prioritizes speed and predictable output.
 
 = How can I place sharing manually? =
 
@@ -83,6 +91,12 @@ Yes. Legacy settings, the `[sharenova_share]` shortcode, the `sharenova_display_
 Yes. Controls have accessible names and focus states, popup focus is contained, Escape closes transient interfaces, status messages use live regions, and motion is minimized when the operating system requests reduced motion.
 
 == Changelog ==
+
+= 2.1.0 =
+* Added Glow, Tilt, Pulse, and Icon twist hover effects alongside Lift, Grow, Icon slide, and None.
+* Added live dashboard previews for every hover choice.
+* Kept all hover effects CSS-only with no extra requests, libraries, or frontend JavaScript.
+* Preserved reduced-motion support for animated effects.
 
 = 2.0.0 =
 * Rebuilt the frontend as a zero-request, privacy-first placement engine.
@@ -107,6 +121,9 @@ Yes. Controls have accessible names and focus states, popup focus is contained, 
 * Preserved ShareNova upgrade compatibility.
 
 == Upgrade Notice ==
+
+= 2.1.0 =
+Adds four lightweight hover effects and matching live previews without increasing frontend requests.
 
 = 2.0.0 =
 Major privacy and performance release. Share-count requests and related settings are removed; existing placement, network, styling, shortcode, action, filter, and block integrations are migrated where possible.

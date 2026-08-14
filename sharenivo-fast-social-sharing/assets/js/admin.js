@@ -76,10 +76,12 @@
 		var background = $('[name="sharenivo_settings[style][brand_bg]"]').val();
 		var icon = $('[name="sharenivo_settings[style][icon_color]"]').val();
 		var gap = $('[name="sharenivo_settings[style][gap]"]').val();
+		var hover = $('[name="sharenivo_settings[style][hover]"]').val();
 		var radius = shape === 'circle' ? '50%' : (shape === 'square' ? '0' : (shape === 'pill' ? '999px' : '10px'));
 		var dimension = size === 'small' ? '36px' : (size === 'large' ? '52px' : '44px');
+		var hoverClasses = 'sharenivo-preview-hover--lift sharenivo-preview-hover--grow sharenivo-preview-hover--slide sharenivo-preview-hover--glow sharenivo-preview-hover--tilt sharenivo-preview-hover--pulse sharenivo-preview-hover--twist sharenivo-preview-hover--none';
 
-		$('.sharenivo-preview__buttons').css('gap', gap + 'px').find('i').css({
+		$('.sharenivo-preview__buttons').removeClass(hoverClasses).addClass('sharenivo-preview-hover--' + hover).css('gap', gap + 'px').find('i').css({
 			'border-radius': radius,
 			'width': shape === 'pill' ? '68px' : dimension,
 			'height': dimension,

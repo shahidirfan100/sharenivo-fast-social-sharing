@@ -1,4 +1,4 @@
-/* ShareNivo 2.0 frontend. Local styles only. */
+/* ShareNivo 2.1 frontend. Local styles only. */
 .sharenivo-share,
 .sharenivo-follow {
 	--sn-button: 44px;
@@ -48,7 +48,7 @@
 	font: inherit;
 	line-height: 1;
 	text-decoration: none !important;
-	transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, color .18s ease;
+	transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, color .18s ease, filter .18s ease;
 }
 
 .sharenivo-button:hover,
@@ -144,8 +144,19 @@
 .sharenivo-hover--lift .sharenivo-button:hover { transform: translateY(-3px); }
 .sharenivo-hover--grow .sharenivo-button:hover { transform: scale(1.08); }
 .sharenivo-hover--slide .sharenivo-button:hover .sharenivo-button__icon { transform: translateX(2px); }
+.sharenivo-hover--glow .sharenivo-button:hover { filter: brightness(1.08) drop-shadow(0 0 8px var(--sn-network)); }
+.sharenivo-color--brand.sharenivo-hover--glow .sharenivo-button:hover,
+.sharenivo-color--minimal.sharenivo-hover--glow .sharenivo-button:hover { filter: brightness(1.08) drop-shadow(0 0 8px var(--sn-brand, #3a1f4f)); }
+.sharenivo-hover--tilt .sharenivo-button:hover { transform: translateY(-2px) rotate(-4deg); }
+.sharenivo-hover--pulse .sharenivo-button:hover { animation: sharenivo-hover-pulse .48s ease both; }
+.sharenivo-hover--twist .sharenivo-button:hover .sharenivo-button__icon { transform: rotate(14deg) scale(1.08); }
 .sharenivo-button__icon { transition: transform .18s ease; }
 .sharenivo-button.is-copied { background: #138a63; }
+
+@keyframes sharenivo-hover-pulse {
+	0%, 100% { transform: scale(1); }
+	50% { transform: scale(1.1); }
+}
 
 .sharenivo-entrance--fade { animation: sharenivo-fade .36s ease both; }
 .sharenivo-entrance--slide { animation: sharenivo-slide .38s ease both; }

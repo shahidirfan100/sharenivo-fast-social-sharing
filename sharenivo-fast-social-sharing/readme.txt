@@ -4,7 +4,7 @@ Tags: social share, share buttons, social media, privacy, lightweight
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,6 +13,10 @@ Fast, privacy-first social sharing and follow tools with flexible placements, sm
 == Description ==
 
 ShareNivo adds polished social sharing without loading social SDKs, remote fonts, tracking pixels, analytics beacons, or share-count APIs. Its frontend uses one local stylesheet and one small local script, loaded only when ShareNivo can produce output.
+
+= What makes ShareNivo different? =
+
+ShareNivo combines six placements and behavior-based prompts in a local, privacy-first engine. Delay, reading progress, inactivity, comment return, exit intent, and WooCommerce confirmation triggers run in the browser without analytics collection or background calls to social networks. Its compact and full-width mobile bars preserve configured shapes and use equal responsive columns without forcing page-level horizontal scrolling.
 
 = ShareNivo 2.1 features =
 
@@ -42,10 +46,10 @@ Supported destinations and their policies:
 * LinkedIn: [User Agreement](https://www.linkedin.com/legal/user-agreement), [Privacy Policy](https://www.linkedin.com/legal/privacy-policy)
 * WhatsApp: [Terms](https://www.whatsapp.com/legal/terms-of-service), [Privacy Policy](https://www.whatsapp.com/legal/privacy-policy)
 * Pinterest: [Terms](https://policy.pinterest.com/terms-of-service), [Privacy Policy](https://policy.pinterest.com/privacy-policy)
-* Threads: [Terms](https://help.instagram.com/769983657850450), [Meta Privacy Policy](https://www.facebook.com/privacy/policy/)
+* Threads: [Terms](https://help.instagram.com/769983657850450), [Supplemental Privacy Policy](https://help.instagram.com/515230437301944)
 * Bluesky: [Terms](https://bsky.social/about/support/tos), [Privacy Policy](https://bsky.social/about/support/privacy-policy)
 * Telegram: [Terms](https://telegram.org/tos), [Privacy Policy](https://telegram.org/privacy)
-* Reddit: [User Agreement](https://redditinc.com/policies/user-agreement), [Privacy Policy](https://reddit.com/policies/privacy-policy)
+* Reddit: [User Agreement](https://redditinc.com/policies/user-agreement), [Privacy Policy](https://redditinc.com/policies/privacy-policy)
 
 Email uses the visitor's configured mail application. Copy Link stays in the browser.
 
@@ -92,6 +96,12 @@ Yes. Controls have accessible names and focus states, popup focus is contained, 
 
 == Changelog ==
 
+= 2.1.1 =
+* Removed the custom CSS editor, storage path, configuration import key, and frontend output to follow WordPress.org directory requirements.
+* Added a settings-schema migration that retains supported 2.x options while removing unsupported top-level values.
+* Verified the contributor metadata and confirmed that no obsolete share-count service references remain.
+* Clarified ShareNivo's local trigger engine and responsive mobile-bar focus.
+
 = 2.1.0 =
 * Added Glow, Tilt, Pulse, and Icon twist hover effects alongside Lift, Grow, Icon slide, and None.
 * Added live dashboard previews for every hover choice.
@@ -121,6 +131,9 @@ Yes. Controls have accessible names and focus states, popup focus is contained, 
 * Preserved ShareNova upgrade compatibility.
 
 == Upgrade Notice ==
+
+= 2.1.1 =
+Compliance update that removes arbitrary CSS input while preserving supported ShareNivo settings.
 
 = 2.1.0 =
 Adds four lightweight hover effects and matching live previews without increasing frontend requests.

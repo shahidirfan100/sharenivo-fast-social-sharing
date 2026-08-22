@@ -1,4 +1,4 @@
-# ShareNivo 2.1.0
+# ShareNivo 2.1.1
 
 ShareNivo is a privacy-first WordPress social sharing and follow plugin. It provides flexible placements through original ShareNivo code and design, without social SDKs, analytics beacons, remote assets, or share-count requests.
 

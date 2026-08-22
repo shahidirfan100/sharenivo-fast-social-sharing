@@ -339,14 +339,18 @@ class Renderer {
 	 * @return string
 	 */
 	public function get_dynamic_css() {
-		$style    = $this->settings['style'];
-		$vertical = absint( $this->settings['locations']['floating']['vertical'] );
+		$style       = $this->settings['style'];
+		$brand_bg    = sanitize_hex_color( $style['brand_bg'] ?? '' );
+		$brand_hover = sanitize_hex_color( $style['brand_hover'] ?? '' );
+		$icon_color  = sanitize_hex_color( $style['icon_color'] ?? '' );
+		$gap         = min( 30, absint( $style['gap'] ?? 8 ) );
+		$vertical    = max( 10, min( 90, absint( $this->settings['locations']['floating']['vertical'] ?? 50 ) ) );
 		return sprintf(
 			':root{--sn-brand:%1$s;--sn-brand-hover:%2$s;--sn-icon:%3$s;--sn-gap:%4$dpx;--sn-floating-y:%5$d%%;}',
-			$style['brand_bg'],
-			$style['brand_hover'],
-			$style['icon_color'],
-			absint( $style['gap'] ),
+			$brand_bg ? $brand_bg : '#3a1f4f',
+			$brand_hover ? $brand_hover : '#ff5a4f',
+			$icon_color ? $icon_color : '#ffffff',
+			$gap,
 			$vertical
 		);
 	}

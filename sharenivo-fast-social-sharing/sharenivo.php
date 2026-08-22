@@ -3,7 +3,7 @@
  * Plugin Name:       ShareNivo - Fast Social Sharing
  * Plugin URI:        https://wordpress.org/plugins/sharenivo-fast-social-sharing/
  * Description:       Fast, privacy-first social sharing and follow buttons with multiple placements, smart triggers, and no tracking or external API requests.
- * Version:           2.1.0
+ * Version:           2.1.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Shahid Irfan
@@ -24,12 +24,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Current plugin version.
  */
-define( 'SHARENIVO_VERSION', '2.1.0' );
+define( 'SHARENIVO_VERSION', '2.1.1' );
 
 /**
  * Stored settings schema version.
  */
-define( 'SHARENIVO_SCHEMA_VERSION', 2 );
+define( 'SHARENIVO_SCHEMA_VERSION', 3 );
 
 /**
  * Main plugin file.

@@ -155,9 +155,6 @@ class PublicDisplay {
 		);
 
 		wp_add_inline_style( 'sharenivo-public', $this->renderer->get_dynamic_css() );
-		if ( '' !== trim( $this->settings['custom_css'] ) ) {
-			wp_add_inline_style( 'sharenivo-public', $this->settings['custom_css'] );
-		}
 
 		wp_localize_script(
 			'sharenivo-public',

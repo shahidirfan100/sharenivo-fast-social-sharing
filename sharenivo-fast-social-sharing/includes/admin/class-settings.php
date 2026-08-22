@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Settings {
 
 	/**
-	 * Get the version 2 defaults.
+	 * Get the current defaults.
 	 *
 	 * @return array
 	 */
@@ -25,7 +25,7 @@ class Settings {
 		$networks = array( 'facebook', 'x', 'linkedin', 'whatsapp', 'pinterest', 'threads', 'bluesky', 'telegram', 'reddit', 'email', 'copy' );
 
 		return array(
-			'schema_version'   => 2,
+			'schema_version'   => SHARENIVO_SCHEMA_VERSION,
 			'enabled'          => true,
 			'networks'         => $networks,
 			'network_order'    => $networks,
@@ -90,7 +90,6 @@ class Settings {
 				'heading'  => 'Follow us',
 				'profiles' => array(),
 			),
-			'custom_css'       => '',
 		);
 	}
 
@@ -113,7 +112,15 @@ class Settings {
 		if ( empty( $stored['schema_version'] ) || 2 > absint( $stored['schema_version'] ) ) {
 			$stored = self::migrate_legacy_settings( $stored );
 			update_option( 'sharenivo_settings', $stored, false );
-			update_option( 'sharenivo_schema_version', 2, false );
+			update_option( 'sharenivo_schema_version', SHARENIVO_SCHEMA_VERSION, false );
+		}
+
+		// Normalize earlier 2.x settings to the current allowlisted schema.
+		if ( SHARENIVO_SCHEMA_VERSION > absint( $stored['schema_version'] ?? 0 ) ) {
+			$stored                   = self::sanitize_settings( self::normalize_settings( $stored ) );
+			$stored['schema_version'] = SHARENIVO_SCHEMA_VERSION;
+			update_option( 'sharenivo_settings', $stored, false );
+			update_option( 'sharenivo_schema_version', SHARENIVO_SCHEMA_VERSION, false );
 		}
 
 		// Move the original 2.0 default pair to the refined plum/coral brand.
@@ -137,7 +144,7 @@ class Settings {
 		$settings = apply_filters( 'sharenivo_settings', $settings );
 		$settings = apply_filters( 'sharenova_settings', $settings );
 
-		return is_array( $settings ) ? self::normalize_settings( $settings ) : self::get_defaults();
+		return is_array( $settings ) ? self::sanitize_settings( self::normalize_settings( $settings ) ) : self::get_defaults();
 	}
 
 	/**
@@ -154,8 +161,6 @@ class Settings {
 		$settings['network_order']    = isset( $legacy['network_order'] ) ? self::sort_networks( $settings['networks'], $legacy['network_order'] ) : $settings['networks'];
 		$settings['post_types']       = isset( $legacy['post_types'] ) && is_array( $legacy['post_types'] ) ? $legacy['post_types'] : $settings['post_types'];
 		$settings['show_on_homepage'] = ! empty( $legacy['show_on_homepage'] );
-		$settings['custom_css']       = isset( $legacy['custom_css'] ) ? $legacy['custom_css'] : '';
-
 		$position = isset( $legacy['position'] ) ? sanitize_key( $legacy['position'] ) : 'floating_left';
 		if ( in_array( $position, array( 'inline_top', 'inline_bottom' ), true ) ) {
 			$settings['locations']['floating']['enabled'] = false;
@@ -179,7 +184,7 @@ class Settings {
 			$settings['style']['icon_color']   = $legacy['custom_icon_color'] ?? '#ffffff';
 		}
 
-		$settings['schema_version'] = 2;
+		$settings['schema_version'] = SHARENIVO_SCHEMA_VERSION;
 		return self::sanitize_settings( $settings );
 	}
 
@@ -205,7 +210,8 @@ class Settings {
 	 */
 	private static function normalize_settings( $settings ) {
 		$defaults = self::get_defaults();
-		$settings = wp_parse_args( is_array( $settings ) ? $settings : array(), $defaults );
+		$settings = is_array( $settings ) ? array_intersect_key( $settings, $defaults ) : array();
+		$settings = wp_parse_args( $settings, $defaults );
 		$settings['locations'] = wp_parse_args( is_array( $settings['locations'] ) ? $settings['locations'] : array(), $defaults['locations'] );
 		foreach ( $defaults['locations'] as $location => $location_defaults ) {
 			$settings['locations'][ $location ] = wp_parse_args( is_array( $settings['locations'][ $location ] ) ? $settings['locations'][ $location ] : array(), $location_defaults );
@@ -277,7 +283,7 @@ class Settings {
 		$entrance_options  = array( 'fade', 'slide', 'zoom', 'none' );
 
 		$clean = array(
-			'schema_version'   => 2,
+			'schema_version'   => SHARENIVO_SCHEMA_VERSION,
 			'enabled'          => ! empty( $input['enabled'] ),
 			'networks'         => $networks,
 			'network_order'    => $order,
@@ -286,7 +292,6 @@ class Settings {
 			'locations'        => array(),
 			'style'            => array(),
 			'follow'           => array(),
-			'custom_css'       => sanitize_textarea_field( $input['custom_css'] ?? '' ),
 		);
 
 		$floating = isset( $locations['floating'] ) && is_array( $locations['floating'] ) ? $locations['floating'] : array();
@@ -517,7 +522,6 @@ class Settings {
 							<?php foreach ( $post_types as $post_type ) : ?><label><input type="checkbox" name="sharenivo_settings[post_types][]" value="<?php echo esc_attr( $post_type->name ); ?>" <?php checked( in_array( $post_type->name, $settings['post_types'], true ) ); ?>> <?php echo esc_html( $post_type->labels->singular_name ); ?></label><?php endforeach; ?>
 							</div>
 							<?php self::render_toggle( 'sharenivo_settings[show_on_homepage]', $settings['show_on_homepage'], __( 'Allow automatic buttons on the front page', 'sharenivo-fast-social-sharing' ) ); ?>
-							<div class="sharenivo-field"><label><?php esc_html_e( 'Custom CSS', 'sharenivo-fast-social-sharing' ); ?><textarea name="sharenivo_settings[custom_css]" rows="8" placeholder=".sharenivo-share { }"><?php echo esc_textarea( $settings['custom_css'] ); ?></textarea></label></div>
 							<div class="sharenivo-portability"><div><label><?php esc_html_e( 'Export configuration', 'sharenivo-fast-social-sharing' ); ?><textarea class="sharenivo-export" rows="8" readonly><?php echo esc_textarea( wp_json_encode( $settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></textarea></label><button type="button" class="button sharenivo-copy-export"><?php esc_html_e( 'Copy JSON', 'sharenivo-fast-social-sharing' ); ?></button></div><div><label><?php esc_html_e( 'Import configuration', 'sharenivo-fast-social-sharing' ); ?><textarea name="sharenivo_import_json" rows="8" placeholder="{ }"></textarea></label><p class="description"><?php esc_html_e( 'Paste a ShareNivo 2.x JSON export. Imported values are validated before saving.', 'sharenivo-fast-social-sharing' ); ?></p></div></div>
 						</div>
 					</section>
@@ -552,7 +556,7 @@ class Settings {
 
 		$settings = self::sanitize_settings( $input );
 		update_option( 'sharenivo_settings', $settings, false );
-		update_option( 'sharenivo_schema_version', 2, false );
+		update_option( 'sharenivo_schema_version', SHARENIVO_SCHEMA_VERSION, false );
 
 		wp_send_json_success(
 			array(
@@ -583,7 +587,7 @@ class Settings {
 		}
 
 		update_option( 'sharenivo_settings', self::sanitize_settings( $input ), false );
-		update_option( 'sharenivo_schema_version', 2, false );
+		update_option( 'sharenivo_schema_version', SHARENIVO_SCHEMA_VERSION, false );
 		wp_safe_redirect( add_query_arg( 'sharenivo-updated', '1', admin_url( 'options-general.php?page=sharenivo' ) ) );
 		exit;
 	}

@@ -2,9 +2,9 @@
 Contributors: shahidirfan100
 Tags: social share, share buttons, social media, privacy, lightweight
 Requires at least: 6.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -96,6 +96,11 @@ Yes. Controls have accessible names and focus states, popup focus is contained, 
 
 == Changelog ==
 
+= 2.1.2 =
+* Updated the WordPress.org compatibility metadata for WordPress 7.1.
+* Audited the plugin release for WordPress 7.1 compatibility, security, and privacy requirements.
+* Completed the developer documentation included with the plugin source.
+
 = 2.1.1 =
 * Removed the custom CSS editor, storage path, configuration import key, and frontend output to follow WordPress.org directory requirements.
 * Added a settings-schema migration that retains supported 2.x options while removing unsupported top-level values.
@@ -132,6 +137,9 @@ Yes. Controls have accessible names and focus states, popup focus is contained, 
 
 == Upgrade Notice ==
 
+= 2.1.2 =
+Compatibility and documentation maintenance release for WordPress 7.1.
+
 = 2.1.1 =
 Compliance update that removes arbitrary CSS input while preserving supported ShareNivo settings.
 
@@ -140,3 +148,4 @@ Adds four lightweight hover effects and matching live previews without increasin
 
 = 2.0.0 =
 Major privacy and performance release. Share-count requests and related settings are removed; existing placement, network, styling, shortcode, action, filter, and block integrations are migrated where possible.
+

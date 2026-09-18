@@ -105,6 +105,8 @@
 .sharenivo-shape--circle { --sn-radius: 999px; }
 .sharenivo-shape--square { --sn-radius: 0; }
 .sharenivo-shape--pill { --sn-radius: 999px; }
+.sharenivo-shape--soft { --sn-radius: 17px; }
+.sharenivo-shape--leaf { --sn-radius: 17px 5px 17px 5px; }
 
 .sharenivo-button--facebook { --sn-network: #1877f2; }
 .sharenivo-button--x,
@@ -139,6 +141,39 @@
 	border-color: var(--sn-brand, #3a1f4f);
 	background: #fff7f5;
 	color: var(--sn-brand, #3a1f4f);
+}
+
+.sharenivo-color--outline .sharenivo-button {
+	border: 1px solid var(--sn-network);
+	background: transparent;
+	box-shadow: none;
+	color: var(--sn-network);
+}
+.sharenivo-color--outline .sharenivo-button:hover,
+.sharenivo-color--outline .sharenivo-button:focus-visible {
+	background: color-mix(in srgb, var(--sn-network) 12%, transparent);
+	color: var(--sn-network);
+}
+.sharenivo-color--contrast .sharenivo-button {
+	background: #111827;
+	color: #fff;
+}
+.sharenivo-color--contrast .sharenivo-button:hover,
+.sharenivo-color--contrast .sharenivo-button:focus-visible {
+	background: #fff;
+	color: #111827;
+}
+.sharenivo-hover-colors--individual .sharenivo-button:hover,
+.sharenivo-hover-colors--individual .sharenivo-button:focus-visible {
+	border-color: var(--sn-network);
+	background: var(--sn-network);
+	color: #fff;
+}
+.sharenivo-color--brand.sharenivo-hover-colors--individual .sharenivo-button:hover,
+.sharenivo-color--brand.sharenivo-hover-colors--individual .sharenivo-button:focus-visible {
+	border-color: var(--sn-brand-hover, #ff5a4f);
+	background: var(--sn-brand-hover, #ff5a4f);
+	color: var(--sn-icon, #fff);
 }
 
 .sharenivo-hover--lift .sharenivo-button:hover { transform: translateY(-3px); }
@@ -197,6 +232,15 @@
 	box-shadow: 0 15px 40px rgba(15, 23, 42, .18);
 }
 .sharenivo-side--right .sharenivo-share__more { right: calc(100% + var(--sn-gap, 8px)); left: auto; }
+.sharenivo-share--floating.sharenivo-mobile--top {
+	top: 12px;
+	transform: none;
+}
+.sharenivo-share--floating.sharenivo-mobile--bottom {
+	top: auto;
+	bottom: 12px;
+	transform: none;
+}
 
 .sharenivo-share--sticky {
 	--sn-sticky-min: var(--sn-button);
@@ -342,12 +386,55 @@
 	transform: translateY(-4px);
 	transition: opacity .18s ease, transform .18s ease;
 }
+.sharenivo-media-tools--top-left { top: 12px; right: auto; left: 12px; }
+.sharenivo-media-tools--top-right { top: 12px; right: 12px; bottom: auto; left: auto; }
+.sharenivo-media-tools--bottom-left { top: auto; right: auto; bottom: 12px; left: 12px; }
+.sharenivo-media-tools--bottom-right { top: auto; right: 12px; bottom: 12px; left: auto; }
 .sharenivo-media-host:hover .sharenivo-media-tools,
 .sharenivo-media-host:focus-within .sharenivo-media-tools { opacity: 1; transform: none; }
 .sharenivo-share--media { --sn-button: 36px; }
 .sharenivo-share--media .sharenivo-share__primary { padding: 6px; border-radius: 13px; background: rgba(255, 255, 255, .94); box-shadow: 0 8px 24px rgba(15, 23, 42, .17); }
 .sharenivo-share--media .sharenivo-button { box-shadow: none; }
 .sharenivo-share--media .sharenivo-share__more { position: absolute; top: 100%; right: 0; min-width: 48px; padding: 6px; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(15, 23, 42, .17); }
+
+.sharenivo-quote {
+	clear: both;
+	margin: 28px 0;
+	padding: 22px 24px;
+	border-radius: 16px;
+	background: #f8f7fb;
+	color: #202331;
+}
+.sharenivo-quote blockquote { margin: 0; }
+.sharenivo-quote blockquote p {
+	margin: 0;
+	font-size: clamp(18px, 2.2vw, 24px);
+	font-weight: 650;
+	line-height: 1.45;
+}
+.sharenivo-quote figcaption { margin-top: 18px; }
+.sharenivo-quote figcaption a {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 38px;
+	padding: 8px 13px;
+	border-radius: 999px;
+	background: #111;
+	color: #fff !important;
+	font-size: 13px;
+	font-weight: 650;
+	text-decoration: none !important;
+	transition: transform .18s ease, background-color .18s ease;
+}
+.sharenivo-quote figcaption a:hover,
+.sharenivo-quote figcaption a:focus-visible { transform: translateY(-2px); background: #3a1f4f; }
+.sharenivo-quote__icon,
+.sharenivo-quote__icon svg { display: block; width: 18px; height: 18px; fill: currentColor; }
+.sharenivo-quote--minimal { padding: 12px 0; border-radius: 0; border-left: 4px solid #3a1f4f; background: transparent; }
+.sharenivo-quote--accent { background: linear-gradient(135deg, #3a1f4f, #5d376f); color: #fff; }
+.sharenivo-quote--accent figcaption a { background: #ff5a4f; }
+.sharenivo-quote--bordered { border: 1px solid #d9d6e4; background: #fff; }
 
 .sharenivo-follow { margin: 24px 0; }
 .sharenivo-follow__heading { margin: 0 0 14px; font-size: 20px; }
@@ -398,6 +485,8 @@
 .sharenivo-share.sharenivo-shape--rounded .sharenivo-button { border-radius: 10px; }
 .sharenivo-share.sharenivo-shape--square .sharenivo-button { border-radius: 0; }
 .sharenivo-share.sharenivo-shape--pill .sharenivo-button { border-radius: 999px; }
+.sharenivo-share.sharenivo-shape--soft .sharenivo-button { border-radius: 17px; }
+.sharenivo-share.sharenivo-shape--leaf .sharenivo-button { border-radius: 17px 5px 17px 5px; }
 
 @media (hover: none) {
 	.sharenivo-media-tools { opacity: 1; transform: none; }

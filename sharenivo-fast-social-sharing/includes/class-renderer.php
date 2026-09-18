@@ -53,15 +53,24 @@ class Renderer {
 
 		$url   = $post_id ? get_permalink( $post_id ) : home_url( '/' );
 		$title = $post_id ? get_the_title( $post_id ) : wp_get_document_title();
+		$meta  = $post_id ? Share_Meta::get( $post_id ) : array();
+		$description = $post_id ? wp_trim_words( wp_strip_all_tags( get_the_excerpt( $post_id ) ), 40, '…' ) : '';
+		$description = $meta['description'] ?? $description;
+		$description = $description ? $description : wp_strip_all_tags( get_bloginfo( 'description' ) );
 
 		if ( ! $url ) {
 			return array();
 		}
 
 		return array(
-			'post_id' => $post_id,
-			'url'     => esc_url_raw( $url ),
-			'title'   => wp_strip_all_tags( $title ? $title : get_bloginfo( 'name' ) ),
+			'post_id'               => $post_id,
+			'url'                   => esc_url_raw( $url ),
+			'title'                 => wp_strip_all_tags( $meta['title'] ?? ( $title ? $title : get_bloginfo( 'name' ) ) ),
+			'description'           => wp_strip_all_tags( $description ),
+			'x_text'                => wp_strip_all_tags( $meta['x_text'] ?? ( $meta['title'] ?? ( $title ? $title : get_bloginfo( 'name' ) ) ) ),
+			'pinterest_image'       => esc_url_raw( $meta['pinterest_image'] ?? '' ),
+			'pinterest_description' => wp_strip_all_tags( $meta['pinterest_description'] ?? $description ),
+			'featured_image'        => $post_id ? esc_url_raw( get_the_post_thumbnail_url( $post_id, 'full' ) ?: '' ) : '',
 		);
 	}
 
@@ -70,16 +79,18 @@ class Renderer {
 	 *
 	 * @param string $location Location name.
 	 * @param int    $post_id  Post ID.
+	 * @param array  $networks Optional selected network keys.
 	 * @return string
 	 */
-	public function render_share( $location, $post_id = 0 ) {
+	public function render_share( $location, $post_id = 0, $networks = array() ) {
 		$context = $this->get_context( $post_id );
 		if ( empty( $context ) || empty( $this->settings['networks'] ) ) {
 			return '';
 		}
 
 		$location = sanitize_key( $location );
-		$buttons  = $this->render_button_group( $context, $this->settings['network_order'], $location );
+		$networks = ! empty( $networks ) ? Networks::sanitize_network_list( $networks ) : $this->settings['network_order'];
+		$buttons  = $this->render_button_group( $context, $networks, $location );
 		if ( '' === $buttons ) {
 			return '';
 		}
@@ -93,6 +104,34 @@ class Renderer {
 		}
 
 		return $buttons;
+	}
+
+	/**
+	 * Render an accessible click-to-share quote.
+	 *
+	 * @param array $attributes Quote attributes.
+	 * @param int   $post_id    Post ID.
+	 * @return string
+	 */
+	public function render_quote( $attributes = array(), $post_id = 0 ) {
+		$context = $this->get_context( $post_id );
+		$text    = isset( $attributes['text'] ) ? sanitize_textarea_field( $attributes['text'] ) : '';
+		$style   = isset( $attributes['style'] ) ? sanitize_key( $attributes['style'] ) : 'card';
+		$style   = in_array( $style, array( 'card', 'minimal', 'accent', 'bordered' ), true ) ? $style : 'card';
+		if ( empty( $context ) || '' === trim( $text ) ) {
+			return '';
+		}
+
+		$url = Networks::get_share_url( 'x', $context['url'], $context['title'], '', $text );
+		return sprintf(
+			'<figure class="sharenivo-quote sharenivo-quote--%1$s"><blockquote><p>%2$s</p></blockquote><figcaption><a href="%3$s" target="_blank" rel="noopener noreferrer" aria-label="%4$s"><span class="sharenivo-quote__icon" aria-hidden="true">%5$s</span><span>%6$s</span></a></figcaption></figure>',
+			esc_attr( $style ),
+			esc_html( $text ),
+			esc_url( $url ),
+			esc_attr__( 'Share this quote on X', 'sharenivo-fast-social-sharing' ),
+			wp_kses( Networks::get_icon( 'x' ), self::svg_allowed_html() ),
+			esc_html__( 'Share this quote', 'sharenivo-fast-social-sharing' )
+		);
 	}
 
 	/**
@@ -113,8 +152,12 @@ class Renderer {
 
 		++self::$instance;
 		$instance_id = 'sharenivo-more-' . self::$instance;
-		$style       = $this->settings['style'];
+		$style       = $this->get_location_style( $location );
 		$max_visible = ! empty( $style['more_button'] ) ? absint( $style['max_visible'] ) : count( $networks );
+		if ( 'floating' === $location && ! empty( $this->settings['locations']['floating']['max_buttons'] ) ) {
+			$networks = array_slice( $networks, 0, absint( $this->settings['locations']['floating']['max_buttons'] ) );
+		}
+		$max_visible = min( $max_visible, count( $networks ) );
 		$primary     = array_slice( $networks, 0, $max_visible );
 		$secondary   = array_slice( $networks, $max_visible );
 		$classes     = array(
@@ -124,6 +167,7 @@ class Renderer {
 			'sharenivo-size--' . sanitize_html_class( $style['size'] ),
 			'sharenivo-color--' . sanitize_html_class( $style['color_scheme'] ),
 			'sharenivo-hover--' . sanitize_html_class( $style['hover'] ),
+			'sharenivo-hover-colors--' . sanitize_html_class( $style['hover_colors'] ?? 'shared' ),
 			'sharenivo-entrance--' . sanitize_html_class( $style['entrance'] ),
 		);
 
@@ -139,7 +183,10 @@ class Renderer {
 		}
 		if ( 'floating' === $location ) {
 			$classes[] = 'sharenivo-side--' . sanitize_html_class( $this->settings['locations']['floating']['side'] );
-			if ( ! empty( $this->settings['locations']['floating']['hide_mobile'] ) ) {
+			$mobile_position = $this->settings['locations']['floating']['mobile_position'] ?? 'off';
+			if ( in_array( $mobile_position, array( 'top', 'bottom' ), true ) ) {
+				$classes[] = 'sharenivo-mobile--' . sanitize_html_class( $mobile_position );
+			} elseif ( ! empty( $this->settings['locations']['floating']['hide_mobile'] ) ) {
 				$classes[] = 'sharenivo-hide-mobile';
 			}
 		}
@@ -181,7 +228,8 @@ class Renderer {
 	 * @return string
 	 */
 	private function render_button( $network, $data, $context, $media = '' ) {
-		$url        = Networks::get_share_url( $network, $context['url'], $context['title'], $media );
+		$media      = $media ? $media : ( 'pinterest' === $network ? ( $context['pinterest_image'] ?? '' ) : '' );
+		$url        = Networks::get_share_url( $network, $context['url'], $context['title'], $media, $context['description'] ?? '', $context['pinterest_description'] ?? '', $context['x_text'] ?? '' );
 		$label      = $data['label'];
 		$class_name = 'sharenivo-button sharenivo-button--' . sanitize_html_class( $network );
 		$icon       = '<span class="sharenivo-button__icon">' . wp_kses( Networks::get_icon( $network ), self::svg_allowed_html() ) . '</span>';
@@ -294,7 +342,17 @@ class Renderer {
 		}
 
 		$buttons = $this->render_button_group( $context, $config['networks'], 'media' );
-		return '<template id="sharenivo-media-template"><div class="sharenivo-media-tools">' . $buttons . '</div></template>';
+		$meta    = $context['post_id'] ? Share_Meta::get( $context['post_id'] ) : array();
+		$attrs   = sprintf(
+			'data-position="%1$s" data-featured-image="%2$s" data-post-image="%3$s" data-post-description="%4$s" data-share-title="%5$s" data-share-description="%6$s"',
+			esc_attr( $config['position'] ?? 'top-right' ),
+			esc_attr( $context['featured_image'] ?? '' ),
+			esc_attr( $meta['pinterest_image'] ?? '' ),
+			esc_attr( $meta['pinterest_description'] ?? '' ),
+			esc_attr( $context['title'] ),
+			esc_attr( $context['description'] ?? '' )
+		);
+		return '<template id="sharenivo-media-template" ' . $attrs . '><div class="sharenivo-media-tools sharenivo-media-tools--' . esc_attr( $config['position'] ?? 'top-right' ) . '">' . $buttons . '</div></template>';
 	}
 
 	/**
@@ -353,6 +411,30 @@ class Renderer {
 			$gap,
 			$vertical
 		);
+	}
+
+	/**
+	 * Resolve the global or floating-specific design settings.
+	 *
+	 * @param string $location Location key.
+	 * @return array
+	 */
+	private function get_location_style( $location ) {
+		$style = $this->settings['style'];
+		if ( 'floating' === $location && empty( $this->settings['locations']['floating']['style']['inherit'] ) ) {
+			$floating = $this->settings['locations']['floating']['style'];
+			$style    = array_merge(
+				$style,
+				array(
+					'shape'        => $floating['shape'],
+					'size'         => $floating['size'],
+					'color_scheme' => $floating['color_scheme'],
+					'hover'        => $floating['hover'],
+					'hover_colors' => $floating['hover_colors'],
+				)
+			);
+		}
+		return $style;
 	}
 
 	/**

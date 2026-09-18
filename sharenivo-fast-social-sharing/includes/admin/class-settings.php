@@ -33,10 +33,20 @@ class Settings {
 			'show_on_homepage' => false,
 			'locations'        => array(
 				'floating' => array(
-					'enabled'     => true,
-					'side'        => 'left',
-					'vertical'    => 50,
-					'hide_mobile' => true,
+					'enabled'         => true,
+					'side'            => 'left',
+					'vertical'        => 50,
+					'hide_mobile'     => true,
+					'mobile_position' => 'off',
+					'max_buttons'     => 0,
+					'style'           => array(
+						'inherit'      => true,
+						'shape'        => 'rounded',
+						'size'         => 'medium',
+						'color_scheme' => 'network',
+						'hover'        => 'lift',
+						'hover_colors' => 'shared',
+					),
 				),
 				'inline'   => array(
 					'enabled'   => false,
@@ -66,9 +76,13 @@ class Settings {
 					'frequency'     => 'session',
 				),
 				'media'    => array(
-					'enabled'   => false,
-					'min_width' => 300,
-					'networks'  => array( 'pinterest', 'facebook', 'x', 'copy' ),
+					'enabled'             => false,
+					'min_width'          => 300,
+					'min_height'         => 180,
+					'position'           => 'top-right',
+					'image_source'       => 'current',
+					'description_source' => 'alt',
+					'networks'           => array( 'pinterest', 'facebook', 'x', 'copy' ),
 				),
 			),
 			'style'            => array(
@@ -81,6 +95,7 @@ class Settings {
 				'show_labels'    => false,
 				'gap'            => 8,
 				'hover'          => 'lift',
+				'hover_colors'   => 'shared',
 				'entrance'       => 'fade',
 				'more_button'    => true,
 				'max_visible'    => 6,
@@ -89,6 +104,9 @@ class Settings {
 				'enabled'  => false,
 				'heading'  => 'Follow us',
 				'profiles' => array(),
+			),
+			'social_meta'      => array(
+				'enabled' => false,
 			),
 		);
 	}
@@ -216,8 +234,13 @@ class Settings {
 		foreach ( $defaults['locations'] as $location => $location_defaults ) {
 			$settings['locations'][ $location ] = wp_parse_args( is_array( $settings['locations'][ $location ] ) ? $settings['locations'][ $location ] : array(), $location_defaults );
 		}
+		$settings['locations']['floating']['style'] = wp_parse_args(
+			is_array( $settings['locations']['floating']['style'] ?? null ) ? $settings['locations']['floating']['style'] : array(),
+			$defaults['locations']['floating']['style']
+		);
 		$settings['style']  = wp_parse_args( is_array( $settings['style'] ) ? $settings['style'] : array(), $defaults['style'] );
 		$settings['follow'] = wp_parse_args( is_array( $settings['follow'] ) ? $settings['follow'] : array(), $defaults['follow'] );
+		$settings['social_meta'] = wp_parse_args( is_array( $settings['social_meta'] ?? null ) ? $settings['social_meta'] : array(), $defaults['social_meta'] );
 		$settings['networks']      = Networks::sanitize_network_list( $settings['networks'] );
 		$settings['network_order'] = self::sort_networks( $settings['networks'], $settings['network_order'] );
 		return $settings;
@@ -263,6 +286,7 @@ class Settings {
 		$locations = isset( $input['locations'] ) && is_array( $input['locations'] ) ? $input['locations'] : array();
 		$style     = isset( $input['style'] ) && is_array( $input['style'] ) ? $input['style'] : array();
 		$follow    = isset( $input['follow'] ) && is_array( $input['follow'] ) ? $input['follow'] : array();
+		$social_meta = isset( $input['social_meta'] ) && is_array( $input['social_meta'] ) ? $input['social_meta'] : array();
 
 		$networks = Networks::sanitize_network_list( $input['networks'] ?? array() );
 		$order    = self::sort_networks( $networks, $input['network_order'] ?? array() );
@@ -276,10 +300,11 @@ class Settings {
 
 		$trigger_options   = array( 'delay', 'scroll', 'bottom', 'inactivity', 'exit', 'comment', 'purchase' );
 		$frequency_options = array( 'always', 'session', 'day', 'week' );
-		$shape_options     = array( 'circle', 'rounded', 'square', 'pill' );
+		$shape_options     = array( 'circle', 'rounded', 'square', 'pill', 'soft', 'leaf' );
 		$size_options      = array( 'small', 'medium', 'large' );
-		$color_options     = array( 'network', 'brand', 'minimal' );
+		$color_options     = array( 'network', 'brand', 'minimal', 'outline', 'contrast' );
 		$hover_options     = array( 'lift', 'grow', 'slide', 'glow', 'tilt', 'pulse', 'twist', 'none' );
+		$hover_color_options = array( 'shared', 'individual' );
 		$entrance_options  = array( 'fade', 'slide', 'zoom', 'none' );
 
 		$clean = array(
@@ -292,14 +317,27 @@ class Settings {
 			'locations'        => array(),
 			'style'            => array(),
 			'follow'           => array(),
+			'social_meta'      => array(),
 		);
 
 		$floating = isset( $locations['floating'] ) && is_array( $locations['floating'] ) ? $locations['floating'] : array();
 		$clean['locations']['floating'] = array(
-			'enabled'     => ! empty( $floating['enabled'] ),
-			'side'        => self::allow_value( $floating['side'] ?? '', array( 'left', 'right' ), 'left' ),
-			'vertical'    => max( 10, min( 90, absint( $floating['vertical'] ?? 50 ) ) ),
-			'hide_mobile' => ! empty( $floating['hide_mobile'] ),
+			'enabled'         => ! empty( $floating['enabled'] ),
+			'side'            => self::allow_value( $floating['side'] ?? '', array( 'left', 'right' ), 'left' ),
+			'vertical'        => max( 10, min( 90, absint( $floating['vertical'] ?? 50 ) ) ),
+			'hide_mobile'     => ! empty( $floating['hide_mobile'] ),
+			'mobile_position' => self::allow_value( $floating['mobile_position'] ?? '', array( 'off', 'top', 'bottom' ), 'off' ),
+			'max_buttons'     => max( 0, min( 11, absint( $floating['max_buttons'] ?? 0 ) ) ),
+			'style'           => array(),
+		);
+		$floating_style = isset( $floating['style'] ) && is_array( $floating['style'] ) ? $floating['style'] : array();
+		$clean['locations']['floating']['style'] = array(
+			'inherit'      => ! empty( $floating_style['inherit'] ),
+			'shape'        => self::allow_value( $floating_style['shape'] ?? '', $shape_options, 'rounded' ),
+			'size'         => self::allow_value( $floating_style['size'] ?? '', $size_options, 'medium' ),
+			'color_scheme' => self::allow_value( $floating_style['color_scheme'] ?? '', $color_options, 'network' ),
+			'hover'        => self::allow_value( $floating_style['hover'] ?? '', $hover_options, 'lift' ),
+			'hover_colors' => self::allow_value( $floating_style['hover_colors'] ?? '', $hover_color_options, 'shared' ),
 		);
 
 		$inline = isset( $locations['inline'] ) && is_array( $locations['inline'] ) ? $locations['inline'] : array();
@@ -333,9 +371,13 @@ class Settings {
 
 		$media = isset( $locations['media'] ) && is_array( $locations['media'] ) ? $locations['media'] : array();
 		$clean['locations']['media'] = array(
-			'enabled'   => ! empty( $media['enabled'] ),
-			'min_width' => max( 120, min( 1200, absint( $media['min_width'] ?? 300 ) ) ),
-			'networks'  => Networks::sanitize_network_list( $media['networks'] ?? array() ),
+			'enabled'             => ! empty( $media['enabled'] ),
+			'min_width'          => max( 120, min( 1200, absint( $media['min_width'] ?? 300 ) ) ),
+			'min_height'         => max( 120, min( 1200, absint( $media['min_height'] ?? 180 ) ) ),
+			'position'           => self::allow_value( $media['position'] ?? '', array( 'top-left', 'top-right', 'bottom-left', 'bottom-right' ), 'top-right' ),
+			'image_source'       => self::allow_value( $media['image_source'] ?? '', array( 'current', 'featured', 'post' ), 'current' ),
+			'description_source' => self::allow_value( $media['description_source'] ?? '', array( 'alt', 'title', 'post', 'share' ), 'alt' ),
+			'networks'           => Networks::sanitize_network_list( $media['networks'] ?? array() ),
 		);
 
 		$brand_bg    = sanitize_hex_color( $style['brand_bg'] ?? $defaults['style']['brand_bg'] );
@@ -352,6 +394,7 @@ class Settings {
 			'show_labels'  => ! empty( $style['show_labels'] ),
 			'gap'          => min( 30, absint( $style['gap'] ?? 8 ) ),
 			'hover'        => self::allow_value( $style['hover'] ?? '', $hover_options, 'lift' ),
+			'hover_colors' => self::allow_value( $style['hover_colors'] ?? '', $hover_color_options, 'shared' ),
 			'entrance'     => self::allow_value( $style['entrance'] ?? '', $entrance_options, 'fade' ),
 			'more_button'  => ! empty( $style['more_button'] ),
 			'max_visible'  => max( 3, min( 12, absint( $style['max_visible'] ?? 6 ) ) ),
@@ -372,6 +415,9 @@ class Settings {
 			'enabled'  => ! empty( $follow['enabled'] ),
 			'heading'  => sanitize_text_field( $follow['heading'] ?? $defaults['follow']['heading'] ),
 			'profiles' => $profiles,
+		);
+		$clean['social_meta'] = array(
+			'enabled' => ! empty( $social_meta['enabled'] ),
 		);
 
 		return $clean;
@@ -488,11 +534,12 @@ class Settings {
 					<section class="sharenivo-panel" data-panel="design" hidden>
 						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Original ShareNivo system', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Design and motion', 'sharenivo-fast-social-sharing' ); ?></h2></div></div>
 						<div class="sharenivo-design-layout"><div class="sharenivo-card sharenivo-fields">
-							<?php self::render_select_field( __( 'Button shape', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][shape]', $settings['style']['shape'], array( 'circle' => __( 'Circle', 'sharenivo-fast-social-sharing' ), 'rounded' => __( 'Rounded', 'sharenivo-fast-social-sharing' ), 'square' => __( 'Square', 'sharenivo-fast-social-sharing' ), 'pill' => __( 'Pill', 'sharenivo-fast-social-sharing' ) ) ); ?>
+							<?php self::render_select_field( __( 'Button shape', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][shape]', $settings['style']['shape'], array( 'circle' => __( 'Circle', 'sharenivo-fast-social-sharing' ), 'rounded' => __( 'Rounded', 'sharenivo-fast-social-sharing' ), 'square' => __( 'Square', 'sharenivo-fast-social-sharing' ), 'pill' => __( 'Pill', 'sharenivo-fast-social-sharing' ), 'soft' => __( 'Soft', 'sharenivo-fast-social-sharing' ), 'leaf' => __( 'Leaf', 'sharenivo-fast-social-sharing' ) ) ); ?>
 							<?php self::render_select_field( __( 'Button size', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][size]', $settings['style']['size'], array( 'small' => __( 'Small', 'sharenivo-fast-social-sharing' ), 'medium' => __( 'Medium', 'sharenivo-fast-social-sharing' ), 'large' => __( 'Large', 'sharenivo-fast-social-sharing' ) ) ); ?>
-							<?php self::render_select_field( __( 'Color system', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][color_scheme]', $settings['style']['color_scheme'], array( 'network' => __( 'Network colors', 'sharenivo-fast-social-sharing' ), 'brand' => __( 'ShareNivo brand', 'sharenivo-fast-social-sharing' ), 'minimal' => __( 'Minimal monochrome', 'sharenivo-fast-social-sharing' ) ) ); ?>
+							<?php self::render_select_field( __( 'Color system', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][color_scheme]', $settings['style']['color_scheme'], array( 'network' => __( 'Network colors', 'sharenivo-fast-social-sharing' ), 'brand' => __( 'ShareNivo brand', 'sharenivo-fast-social-sharing' ), 'minimal' => __( 'Minimal monochrome', 'sharenivo-fast-social-sharing' ), 'outline' => __( 'Outline', 'sharenivo-fast-social-sharing' ), 'contrast' => __( 'Contrast', 'sharenivo-fast-social-sharing' ) ) ); ?>
 							<div class="sharenivo-field sharenivo-color-fields"><label><?php esc_html_e( 'Brand background', 'sharenivo-fast-social-sharing' ); ?><input class="sharenivo-color" type="text" name="sharenivo_settings[style][brand_bg]" value="<?php echo esc_attr( $settings['style']['brand_bg'] ); ?>"></label><label><?php esc_html_e( 'Brand hover', 'sharenivo-fast-social-sharing' ); ?><input class="sharenivo-color" type="text" name="sharenivo_settings[style][brand_hover]" value="<?php echo esc_attr( $settings['style']['brand_hover'] ); ?>"></label><label><?php esc_html_e( 'Icon color', 'sharenivo-fast-social-sharing' ); ?><input class="sharenivo-color" type="text" name="sharenivo_settings[style][icon_color]" value="<?php echo esc_attr( $settings['style']['icon_color'] ); ?>"></label></div>
 							<?php self::render_select_field( __( 'Hover effect', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][hover]', $settings['style']['hover'], array( 'lift' => __( 'Lift', 'sharenivo-fast-social-sharing' ), 'grow' => __( 'Grow', 'sharenivo-fast-social-sharing' ), 'slide' => __( 'Icon slide', 'sharenivo-fast-social-sharing' ), 'glow' => __( 'Glow', 'sharenivo-fast-social-sharing' ), 'tilt' => __( 'Tilt', 'sharenivo-fast-social-sharing' ), 'pulse' => __( 'Pulse', 'sharenivo-fast-social-sharing' ), 'twist' => __( 'Icon twist', 'sharenivo-fast-social-sharing' ), 'none' => __( 'None', 'sharenivo-fast-social-sharing' ) ) ); ?>
+							<?php self::render_select_field( __( 'Hover colors', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][hover_colors]', $settings['style']['hover_colors'], array( 'shared' => __( 'Shared hover color', 'sharenivo-fast-social-sharing' ), 'individual' => __( 'Each network color', 'sharenivo-fast-social-sharing' ) ) ); ?>
 							<?php self::render_select_field( __( 'Entrance effect', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][entrance]', $settings['style']['entrance'], array( 'fade' => __( 'Fade', 'sharenivo-fast-social-sharing' ), 'slide' => __( 'Slide', 'sharenivo-fast-social-sharing' ), 'zoom' => __( 'Zoom', 'sharenivo-fast-social-sharing' ), 'none' => __( 'None', 'sharenivo-fast-social-sharing' ) ) ); ?>
 							<div class="sharenivo-field"><label><?php esc_html_e( 'Gap (px)', 'sharenivo-fast-social-sharing' ); ?><input type="number" min="0" max="30" name="sharenivo_settings[style][gap]" value="<?php echo esc_attr( $settings['style']['gap'] ); ?>"></label></div>
 							<div class="sharenivo-field"><label><?php esc_html_e( 'Visible before More', 'sharenivo-fast-social-sharing' ); ?><input type="number" min="3" max="12" name="sharenivo_settings[style][max_visible]" value="<?php echo esc_attr( $settings['style']['max_visible'] ); ?>"></label></div>
@@ -522,6 +569,8 @@ class Settings {
 							<?php foreach ( $post_types as $post_type ) : ?><label><input type="checkbox" name="sharenivo_settings[post_types][]" value="<?php echo esc_attr( $post_type->name ); ?>" <?php checked( in_array( $post_type->name, $settings['post_types'], true ) ); ?>> <?php echo esc_html( $post_type->labels->singular_name ); ?></label><?php endforeach; ?>
 							</div>
 							<?php self::render_toggle( 'sharenivo_settings[show_on_homepage]', $settings['show_on_homepage'], __( 'Allow automatic buttons on the front page', 'sharenivo-fast-social-sharing' ) ); ?>
+							<?php self::render_toggle( 'sharenivo_settings[social_meta][enabled]', $settings['social_meta']['enabled'], __( 'Add duplicate-safe social preview metadata', 'sharenivo-fast-social-sharing' ) ); ?>
+							<p class="description"><?php esc_html_e( 'When enabled, ShareNivo adds local Open Graph and X card tags only when common SEO metadata providers are not active. No tracking or remote request is involved.', 'sharenivo-fast-social-sharing' ); ?></p>
 							<div class="sharenivo-portability"><div><label><?php esc_html_e( 'Export configuration', 'sharenivo-fast-social-sharing' ); ?><textarea class="sharenivo-export" rows="8" readonly><?php echo esc_textarea( wp_json_encode( $settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></textarea></label><button type="button" class="button sharenivo-copy-export"><?php esc_html_e( 'Copy JSON', 'sharenivo-fast-social-sharing' ); ?></button></div><div><label><?php esc_html_e( 'Import configuration', 'sharenivo-fast-social-sharing' ); ?><textarea name="sharenivo_import_json" rows="8" placeholder="{ }"></textarea></label><p class="description"><?php esc_html_e( 'Paste a ShareNivo 2.x JSON export. Imported values are validated before saving.', 'sharenivo-fast-social-sharing' ); ?></p></div></div>
 						</div>
 					</section>
@@ -652,7 +701,13 @@ class Settings {
 			<?php if ( 'floating' === $key ) : ?>
 				<?php self::render_select_field( __( 'Side', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][floating][side]', $value['side'], array( 'left' => __( 'Left', 'sharenivo-fast-social-sharing' ), 'right' => __( 'Right', 'sharenivo-fast-social-sharing' ) ) ); ?>
 				<div class="sharenivo-field"><label><?php esc_html_e( 'Vertical position (%)', 'sharenivo-fast-social-sharing' ); ?><input type="number" min="10" max="90" name="sharenivo_settings[locations][floating][vertical]" value="<?php echo esc_attr( $value['vertical'] ); ?>"></label></div>
+				<div class="sharenivo-field"><label><?php esc_html_e( 'Maximum rail buttons', 'sharenivo-fast-social-sharing' ); ?><input type="number" min="0" max="11" name="sharenivo_settings[locations][floating][max_buttons]" value="<?php echo esc_attr( $value['max_buttons'] ); ?>"><small><?php esc_html_e( 'Zero keeps all enabled networks available.', 'sharenivo-fast-social-sharing' ); ?></small></label></div>
 				<?php self::render_toggle( 'sharenivo_settings[locations][floating][hide_mobile]', $value['hide_mobile'], __( 'Hide rail on mobile', 'sharenivo-fast-social-sharing' ) ); ?>
+				<?php self::render_select_field( __( 'Mobile rail position', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][floating][mobile_position]', $value['mobile_position'], array( 'off' => __( 'Use hide setting', 'sharenivo-fast-social-sharing' ), 'top' => __( 'Top edge', 'sharenivo-fast-social-sharing' ), 'bottom' => __( 'Bottom edge', 'sharenivo-fast-social-sharing' ) ) ); ?>
+				<?php self::render_toggle( 'sharenivo_settings[locations][floating][style][inherit]', $value['style']['inherit'], __( 'Use global design', 'sharenivo-fast-social-sharing' ) ); ?>
+				<?php self::render_select_field( __( 'Floating shape', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][floating][style][shape]', $value['style']['shape'], array( 'circle' => __( 'Circle', 'sharenivo-fast-social-sharing' ), 'rounded' => __( 'Rounded', 'sharenivo-fast-social-sharing' ), 'square' => __( 'Square', 'sharenivo-fast-social-sharing' ), 'pill' => __( 'Pill', 'sharenivo-fast-social-sharing' ), 'soft' => __( 'Soft', 'sharenivo-fast-social-sharing' ), 'leaf' => __( 'Leaf', 'sharenivo-fast-social-sharing' ) ) ); ?>
+				<?php self::render_select_field( __( 'Floating colors', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][floating][style][color_scheme]', $value['style']['color_scheme'], array( 'network' => __( 'Network colors', 'sharenivo-fast-social-sharing' ), 'brand' => __( 'ShareNivo brand', 'sharenivo-fast-social-sharing' ), 'minimal' => __( 'Minimal', 'sharenivo-fast-social-sharing' ), 'outline' => __( 'Outline', 'sharenivo-fast-social-sharing' ), 'contrast' => __( 'Contrast', 'sharenivo-fast-social-sharing' ) ) ); ?>
+				<?php self::render_select_field( __( 'Floating hover colors', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][floating][style][hover_colors]', $value['style']['hover_colors'], array( 'shared' => __( 'Shared hover color', 'sharenivo-fast-social-sharing' ), 'individual' => __( 'Each network color', 'sharenivo-fast-social-sharing' ) ) ); ?>
 			<?php elseif ( 'inline' === $key ) : ?>
 				<?php self::render_select_field( __( 'Content position', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][inline][position]', $value['position'], array( 'top' => __( 'Above', 'sharenivo-fast-social-sharing' ), 'bottom' => __( 'Below', 'sharenivo-fast-social-sharing' ), 'both' => __( 'Above and below', 'sharenivo-fast-social-sharing' ) ) ); ?>
 				<?php self::render_select_field( __( 'Alignment', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][inline][alignment]', $value['alignment'], array( 'left' => __( 'Left', 'sharenivo-fast-social-sharing' ), 'center' => __( 'Center', 'sharenivo-fast-social-sharing' ), 'right' => __( 'Right', 'sharenivo-fast-social-sharing' ) ) ); ?>
@@ -669,6 +724,10 @@ class Settings {
 				<?php self::render_select_field( __( 'Frequency', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][' . $key . '][frequency]', $value['frequency'], array( 'always' => __( 'Every page view', 'sharenivo-fast-social-sharing' ), 'session' => __( 'Once per session', 'sharenivo-fast-social-sharing' ), 'day' => __( 'Once per day', 'sharenivo-fast-social-sharing' ), 'week' => __( 'Once per week', 'sharenivo-fast-social-sharing' ) ) ); ?>
 			<?php elseif ( 'media' === $key ) : ?>
 				<div class="sharenivo-field"><label><?php esc_html_e( 'Minimum image width (px)', 'sharenivo-fast-social-sharing' ); ?><input type="number" min="120" max="1200" name="sharenivo_settings[locations][media][min_width]" value="<?php echo esc_attr( $value['min_width'] ); ?>"></label></div>
+				<div class="sharenivo-field"><label><?php esc_html_e( 'Minimum image height (px)', 'sharenivo-fast-social-sharing' ); ?><input type="number" min="120" max="1200" name="sharenivo_settings[locations][media][min_height]" value="<?php echo esc_attr( $value['min_height'] ); ?>"></label></div>
+				<?php self::render_select_field( __( 'Button position', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][media][position]', $value['position'], array( 'top-left' => __( 'Top left', 'sharenivo-fast-social-sharing' ), 'top-right' => __( 'Top right', 'sharenivo-fast-social-sharing' ), 'bottom-left' => __( 'Bottom left', 'sharenivo-fast-social-sharing' ), 'bottom-right' => __( 'Bottom right', 'sharenivo-fast-social-sharing' ) ) ); ?>
+				<?php self::render_select_field( __( 'Pinterest image source', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][media][image_source]', $value['image_source'], array( 'current' => __( 'Current image', 'sharenivo-fast-social-sharing' ), 'featured' => __( 'Featured image', 'sharenivo-fast-social-sharing' ), 'post' => __( 'Per-post Pinterest image', 'sharenivo-fast-social-sharing' ) ) ); ?>
+				<?php self::render_select_field( __( 'Pinterest description source', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[locations][media][description_source]', $value['description_source'], array( 'alt' => __( 'Image alt text', 'sharenivo-fast-social-sharing' ), 'title' => __( 'Image title', 'sharenivo-fast-social-sharing' ), 'post' => __( 'Per-post Pinterest description', 'sharenivo-fast-social-sharing' ), 'share' => __( 'Share description', 'sharenivo-fast-social-sharing' ) ) ); ?>
 				<div class="sharenivo-checkbox-grid"><?php foreach ( array( 'pinterest', 'facebook', 'x', 'copy' ) as $network ) : ?><label><input type="checkbox" name="sharenivo_settings[locations][media][networks][]" value="<?php echo esc_attr( $network ); ?>" <?php checked( in_array( $network, $value['networks'], true ) ); ?>> <?php echo esc_html( Networks::get_share_networks()[ $network ]['label'] ); ?></label><?php endforeach; ?></div>
 			<?php else : ?>
 				<p class="description"><?php esc_html_e( 'Uses the global network and design settings.', 'sharenivo-fast-social-sharing' ); ?></p>

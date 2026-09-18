@@ -118,26 +118,34 @@ class Networks {
 	 * @param string $network Network key.
 	 * @param string $url     Canonical page URL.
 	 * @param string $title   Page title.
-	 * @param string $media   Optional media URL for Pinterest.
+	 * @param string $media       Optional media URL for Pinterest.
+	 * @param string $text        Optional text for text-oriented networks.
+	 * @param string $description Optional Pinterest description.
+	 * @param string $x_text      Optional X-specific text.
 	 * @return string
 	 */
-	public static function get_share_url( $network, $url, $title, $media = '' ) {
+	public static function get_share_url( $network, $url, $title, $media = '', $text = '', $description = '', $x_text = '' ) {
 		$url_encoded   = rawurlencode( esc_url_raw( $url ) );
 		$title_encoded = rawurlencode( wp_strip_all_tags( $title ) );
-		$text_encoded  = rawurlencode( trim( wp_strip_all_tags( $title ) . ' ' . esc_url_raw( $url ) ) );
+		$text          = $text ? $text : $title;
+		$text_encoded  = rawurlencode( trim( wp_strip_all_tags( $text ) . ' ' . esc_url_raw( $url ) ) );
+		$x_text        = $x_text ? $x_text : $text;
+		$text_only     = rawurlencode( wp_strip_all_tags( $x_text ) );
+		$description   = $description ? $description : $title;
+		$description_encoded = rawurlencode( wp_strip_all_tags( $description ) );
 		$media_encoded = rawurlencode( esc_url_raw( $media ) );
 
 		switch ( $network ) {
 			case 'facebook':
 				return 'https://www.facebook.com/sharer/sharer.php?u=' . $url_encoded;
 			case 'x':
-				return 'https://twitter.com/intent/tweet?url=' . $url_encoded . '&text=' . $title_encoded;
+				return 'https://twitter.com/intent/tweet?url=' . $url_encoded . '&text=' . $text_only;
 			case 'linkedin':
 				return 'https://www.linkedin.com/sharing/share-offsite/?url=' . $url_encoded;
 			case 'whatsapp':
 				return 'https://wa.me/?text=' . $text_encoded;
 			case 'pinterest':
-				$url = 'https://www.pinterest.com/pin/create/button/?url=' . $url_encoded . '&description=' . $title_encoded;
+				$url = 'https://www.pinterest.com/pin/create/button/?url=' . $url_encoded . '&description=' . $description_encoded;
 				return $media_encoded ? $url . '&media=' . $media_encoded : $url;
 			case 'threads':
 				return 'https://www.threads.net/intent/post?text=' . $text_encoded;

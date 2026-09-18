@@ -4,7 +4,7 @@ Tags: social share, share buttons, social media, privacy, lightweight
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.1.2
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,8 +28,13 @@ ShareNivo combines six placements and behavior-based prompts in a local, privacy
 * Original ShareNivo deep-plum and vivid-coral design system with network, brand, and minimal color modes.
 * Shape, size, spacing, labels, button order, eight hover choices, and entrance controls.
 * Accessible keyboard navigation, visible focus, dialog semantics, live copy feedback, and reduced-motion support.
-* Per-post placement overrides.
-* Share and Follow blocks, shortcodes, widgets, actions, and filters.
+* Per-post placement overrides and custom share title, description, X text, Pinterest image, and Pinterest description.
+* Optional duplicate-safe Open Graph and X preview metadata, disabled by default and skipped when common SEO plugins are active.
+* Click-to-share quote block and shortcode with four original local styles and accessible keyboard/focus behavior.
+* Image sharing controls with minimum width/height, four positions, per-image opt-out classes, and selectable Pinterest image/description sources.
+* Separate floating-rail shape/color/hover settings, button limits, and mobile edge positioning.
+* Share and Follow blocks, quote/share shortcodes, widgets, actions, and filters.
+* Share shortcode support for explicit post_id and selected comma-separated networks while preserving existing ShareNivo and ShareNova names.
 * Validated JSON import/export.
 * Upgrade migration for existing ShareNivo and ShareNova settings and integrations.
 
@@ -80,6 +85,11 @@ Most networks no longer provide reliable public counters. Fetching counts adds l
 
 = How can I place sharing manually? =
 
+Use the ShareNivo Click-to-Share Quote block or the sharenivo_quote shortcode with style="accent". The older sharenivo_click_to_share name is also supported.
+
+= Does image sharing track visitors? =
+
+No. Image eligibility, opt-out classes such as no-pin, and source selection are handled locally in the browser. Pinterest is contacted only after a visitor deliberately clicks a Pinterest button.
 Use `[sharenivo_share]`, add the ShareNivo Share Buttons block, or call `do_action( 'sharenivo_display_buttons' )` in a theme template.
 
 = How can I display follow links? =
@@ -95,6 +105,15 @@ Yes. Legacy settings, the `[sharenova_share]` shortcode, the `sharenova_display_
 Yes. Controls have accessible names and focus states, popup focus is contained, Escape closes transient interfaces, status messages use live regions, and motion is minimized when the operating system requests reduced motion.
 
 == Changelog ==
+
+= 2.2.0 =
+* Added per-post custom share title, description, X text, Pinterest image, and Pinterest description fields.
+* Added optional duplicate-safe Open Graph and X preview metadata without tracking or remote requests.
+* Added an accessible Click-to-Share Quote block and shortcode with four original local styles.
+* Added image minimum-height filtering, four overlay positions, per-image opt-out classes, and configurable Pinterest image/description sources.
+* Added separate floating-rail design controls, outline/contrast presets, individual network hover colors, floating button limits, and mobile edge positioning.
+* Added explicit post_id and selected-network attributes to the share shortcode while preserving ShareNivo and ShareNova compatibility.
+* Kept the existing current-network registry unchanged and excluded obsolete networks, share counts, analytics, UTM, Bitly, and remote API integrations.
 
 = 2.1.2 =
 * Updated the WordPress.org compatibility metadata for WordPress 7.1.
@@ -137,6 +156,9 @@ Yes. Controls have accessible names and focus states, popup focus is contained, 
 
 == Upgrade Notice ==
 
+= 2.2.0 =
+Adds privacy-safe per-post sharing data, quote sharing, advanced image controls, floating-rail styling, and flexible share shortcodes. Existing settings and compatibility names are preserved.
+
 = 2.1.2 =
 Compatibility and documentation maintenance release for WordPress 7.1.
 
@@ -148,4 +170,3 @@ Adds four lightweight hover effects and matching live previews without increasin
 
 = 2.0.0 =
 Major privacy and performance release. Share-count requests and related settings are removed; existing placement, network, styling, shortcode, action, filter, and block integrations are migrated where possible.
-

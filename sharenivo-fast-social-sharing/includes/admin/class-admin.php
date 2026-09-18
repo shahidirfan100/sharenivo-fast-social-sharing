@@ -128,6 +128,7 @@ class Admin {
 		$value     = is_array( $value ) ? $value : array();
 		$mode      = isset( $value['mode'] ) ? sanitize_key( $value['mode'] ) : 'inherit';
 		$locations = isset( $value['locations'] ) && is_array( $value['locations'] ) ? $value['locations'] : array();
+		$share_meta = Share_Meta::get( $post->ID );
 
 		wp_nonce_field( 'sharenivo_save_post_settings', 'sharenivo_post_nonce' );
 		?>
@@ -155,6 +156,14 @@ class Admin {
 			<?php endforeach; ?>
 			</fieldset>
 			<p class="description"><?php esc_html_e( 'Custom mode overrides which globally configured placements appear here.', 'sharenivo-fast-social-sharing' ); ?></p>
+			<hr>
+			<h4><?php esc_html_e( 'Custom sharing data', 'sharenivo-fast-social-sharing' ); ?></h4>
+			<p class="description"><?php esc_html_e( 'Blank fields use the normal post title, excerpt, and image. These values stay in WordPress and are only placed into the selected share link.', 'sharenivo-fast-social-sharing' ); ?></p>
+			<p><label><?php esc_html_e( 'Share title', 'sharenivo-fast-social-sharing' ); ?><input type="text" class="widefat" name="sharenivo_share_meta[title]" value="<?php echo esc_attr( $share_meta['title'] ?? '' ); ?>"></label></p>
+			<p><label><?php esc_html_e( 'Share description', 'sharenivo-fast-social-sharing' ); ?><textarea class="widefat" rows="3" name="sharenivo_share_meta[description]"><?php echo esc_textarea( $share_meta['description'] ?? '' ); ?></textarea></label></p>
+			<p><label><?php esc_html_e( 'Custom X text', 'sharenivo-fast-social-sharing' ); ?><input type="text" class="widefat" name="sharenivo_share_meta[x_text]" value="<?php echo esc_attr( $share_meta['x_text'] ?? '' ); ?>"></label></p>
+			<p><label><?php esc_html_e( 'Pinterest image URL', 'sharenivo-fast-social-sharing' ); ?><input type="url" class="widefat" name="sharenivo_share_meta[pinterest_image]" value="<?php echo esc_attr( $share_meta['pinterest_image'] ?? '' ); ?>" placeholder="https://"></label></p>
+			<p><label><?php esc_html_e( 'Pinterest description', 'sharenivo-fast-social-sharing' ); ?><textarea class="widefat" rows="2" name="sharenivo_share_meta[pinterest_description]"><?php echo esc_textarea( $share_meta['pinterest_description'] ?? '' ); ?></textarea></label></p>
 		</div>
 		<?php
 	}
@@ -180,6 +189,13 @@ class Admin {
 		$allowed   = array( 'floating', 'inline', 'sticky', 'popup', 'flyin', 'media' );
 		$locations = isset( $_POST['sharenivo_override']['locations'] ) && is_array( $_POST['sharenivo_override']['locations'] ) ? array_map( 'sanitize_key', wp_unslash( $_POST['sharenivo_override']['locations'] ) ) : array();
 		$locations = array_values( array_intersect( $allowed, $locations ) );
+		$share_meta_input = isset( $_POST['sharenivo_share_meta'] ) && is_array( $_POST['sharenivo_share_meta'] ) ? wp_unslash( $_POST['sharenivo_share_meta'] ) : array();
+		$share_meta       = Share_Meta::sanitize( $share_meta_input );
+		if ( Share_Meta::has_values( $share_meta ) ) {
+			update_post_meta( $post_id, Share_Meta::META_KEY, $share_meta );
+		} else {
+			delete_post_meta( $post_id, Share_Meta::META_KEY );
+		}
 
 		if ( 'inherit' === $mode ) {
 			delete_post_meta( $post_id, '_sharenivo_override' );

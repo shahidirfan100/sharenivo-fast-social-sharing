@@ -39,11 +39,14 @@ class PublicDisplay {
 		add_action( 'widgets_init', array( $this, 'register_widget' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'wp_footer', array( $this, 'render_footer_locations' ) );
+		add_action( 'wp_head', array( $this, 'render_social_meta' ), 20 );
 		add_filter( 'the_content', array( $this, 'inject_inline_buttons' ), 15 );
 
 		add_shortcode( 'sharenivo_share', array( $this, 'share_shortcode' ) );
 		add_shortcode( 'sharenivo_follow', array( $this, 'follow_shortcode' ) );
 		add_shortcode( 'sharenova_share', array( $this, 'share_shortcode' ) );
+		add_shortcode( 'sharenivo_quote', array( $this, 'quote_shortcode' ) );
+		add_shortcode( 'sharenivo_click_to_share', array( $this, 'quote_shortcode' ) );
 		add_action( 'sharenivo_display_buttons', array( $this, 'render_manual_share' ) );
 		add_action( 'sharenivo_display_follow', array( $this, 'render_manual_follow' ) );
 		add_action( 'sharenova_display_buttons', array( $this, 'render_manual_share' ) );
@@ -68,7 +71,7 @@ class PublicDisplay {
 		wp_register_script(
 			'sharenivo-block-editor',
 			SHARENIVO_PLUGIN_URL . 'assets/js/block.js',
-			array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-block-editor', 'wp-server-side-render' ),
+			array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-block-editor', 'wp-components', 'wp-server-side-render' ),
 			$this->asset_version( 'assets/js/block.js' ),
 			true
 		);
@@ -100,6 +103,18 @@ class PublicDisplay {
 		register_block_type( 'sharenivo/share-buttons', $args );
 		register_block_type( 'sharenivo/follow-links', $args );
 		register_block_type( 'wssp/share-buttons', $args );
+		$quote_args               = $args;
+		$quote_args['attributes'] = array(
+			'text'  => array(
+				'type'    => 'string',
+				'default' => '',
+			),
+			'style' => array(
+				'type'    => 'string',
+				'default' => 'card',
+			),
+		);
+		register_block_type( 'sharenivo/share-quote', $quote_args );
 	}
 
 	/**
@@ -111,7 +126,7 @@ class PublicDisplay {
 	 * @return string
 	 */
 	public function render_block( $attributes = array(), $content = '', $block = null ) {
-		unset( $attributes, $content );
+		unset( $content );
 		if ( empty( $this->settings['enabled'] ) ) {
 			return '';
 		}
@@ -122,6 +137,9 @@ class PublicDisplay {
 		}
 
 		$post_id = is_object( $block ) && ! empty( $block->context['postId'] ) ? absint( $block->context['postId'] ) : 0;
+		if ( 'sharenivo/share-quote' === $block_name ) {
+			return $this->renderer->render_quote( is_array( $attributes ) ? $attributes : array(), $post_id );
+		}
 		return $this->renderer->render_share( 'inline', $post_id );
 	}
 
@@ -163,8 +181,11 @@ class PublicDisplay {
 				'copySuccess' => __( 'Link copied.', 'sharenivo-fast-social-sharing' ),
 				'copyError'   => __( 'Copy failed. Please copy the address from your browser.', 'sharenivo-fast-social-sharing' ),
 				'media'       => array(
-					'enabled'  => $this->automatic_location_enabled( 'media' ),
-					'minWidth' => absint( $this->settings['locations']['media']['min_width'] ),
+					'enabled'            => $this->automatic_location_enabled( 'media' ),
+					'minWidth'          => absint( $this->settings['locations']['media']['min_width'] ),
+					'minHeight'         => absint( $this->settings['locations']['media']['min_height'] ),
+					'imageSource'       => $this->settings['locations']['media']['image_source'],
+					'descriptionSource' => $this->settings['locations']['media']['description_source'],
 				),
 			)
 		);
@@ -224,10 +245,26 @@ class PublicDisplay {
 	 * @return string
 	 */
 	public function share_shortcode( $attributes = array() ) {
-		$attributes = shortcode_atts( array( 'location' => 'inline' ), $attributes, 'sharenivo_share' );
+		$attributes = shortcode_atts( array( 'location' => 'inline', 'post_id' => 0, 'networks' => '' ), $attributes, 'sharenivo_share' );
 		$location   = sanitize_key( $attributes['location'] );
 		$location   = in_array( $location, array( 'inline', 'floating', 'sticky' ), true ) ? $location : 'inline';
-		return ! empty( $this->settings['enabled'] ) ? $this->renderer->render_share( $location, get_the_ID() ) : '';
+		$post_id    = absint( $attributes['post_id'] ) ?: get_the_ID();
+		$networks   = '' !== trim( (string) $attributes['networks'] ) ? preg_split( '/[\s,]+/', sanitize_text_field( $attributes['networks'] ) ) : array();
+		return ! empty( $this->settings['enabled'] ) ? $this->renderer->render_share( $location, $post_id, $networks ) : '';
+	}
+
+	/**
+	 * Click-to-share quote shortcode callback.
+	 *
+	 * @param array  $attributes Shortcode attributes.
+	 * @param string $content    Enclosed quote text.
+	 * @return string
+	 */
+	public function quote_shortcode( $attributes = array(), $content = '' ) {
+		$attributes = shortcode_atts( array( 'text' => '', 'style' => 'card', 'post_id' => 0 ), $attributes, 'sharenivo_quote' );
+		$text       = trim( $attributes['text'] ? $attributes['text'] : $content );
+		$post_id    = absint( $attributes['post_id'] ) ?: get_the_ID();
+		return ! empty( $this->settings['enabled'] ) ? $this->renderer->render_quote( array( 'text' => $text, 'style' => $attributes['style'] ), $post_id ) : '';
 	}
 
 	/**
@@ -330,7 +367,62 @@ class PublicDisplay {
 			return false;
 		}
 		$content = $post->post_content;
-		return has_shortcode( $content, 'sharenivo_share' ) || has_shortcode( $content, 'sharenivo_follow' ) || has_shortcode( $content, 'sharenova_share' ) || ( function_exists( 'has_block' ) && ( has_block( 'sharenivo/share-buttons', $content ) || has_block( 'sharenivo/follow-links', $content ) || has_block( 'wssp/share-buttons', $content ) ) );
+		return has_shortcode( $content, 'sharenivo_share' ) || has_shortcode( $content, 'sharenivo_follow' ) || has_shortcode( $content, 'sharenova_share' ) || has_shortcode( $content, 'sharenivo_quote' ) || has_shortcode( $content, 'sharenivo_click_to_share' ) || ( function_exists( 'has_block' ) && ( has_block( 'sharenivo/share-buttons', $content ) || has_block( 'sharenivo/follow-links', $content ) || has_block( 'wssp/share-buttons', $content ) || has_block( 'sharenivo/share-quote', $content ) ) );
+	}
+
+	/**
+	 * Render optional social preview metadata without duplicating SEO plugins.
+	 */
+	public function render_social_meta() {
+		if ( empty( $this->settings['social_meta']['enabled'] ) || is_admin() || is_feed() || ! is_singular() || $this->has_social_meta_provider() ) {
+			return;
+		}
+
+		$context = $this->renderer->get_context( get_queried_object_id() );
+		if ( empty( $context ) ) {
+			return;
+		}
+		if ( ! apply_filters( 'sharenivo_should_output_social_meta', true, $context['post_id'], $context ) ) {
+			return;
+		}
+
+		$tags = array(
+			'og:title'       => $context['title'],
+			'og:description' => $context['description'],
+			'og:url'         => $context['url'],
+			'og:type'        => 'article',
+			'twitter:title'  => $context['title'],
+			'twitter:description' => $context['description'],
+			'twitter:card'   => $context['featured_image'] ? 'summary_large_image' : 'summary',
+		);
+		if ( $context['featured_image'] ) {
+			$tags['og:image']      = $context['featured_image'];
+			$tags['twitter:image'] = $context['featured_image'];
+		}
+
+		foreach ( $tags as $name => $content ) {
+			$attribute = 0 === strpos( $name, 'og:' ) ? 'property' : 'name';
+			printf( '<meta %1$s="%2$s" content="%3$s" />' . "\n", esc_attr( $attribute ), esc_attr( $name ), esc_attr( $content ) );
+		}
+	}
+
+	/**
+	 * Detect common SEO metadata providers before emitting optional tags.
+	 *
+	 * @return bool
+	 */
+	private function has_social_meta_provider() {
+		foreach ( array( 'WPSEO_VERSION', 'AIOSEO_VERSION', 'RANK_MATH_VERSION', 'SEOPRESS_VERSION', 'THE_SEO_FRAMEWORK_VERSION', 'SLIM_SEO_VERSION' ) as $constant ) {
+			if ( defined( $constant ) ) {
+				return true;
+			}
+		}
+		foreach ( array( 'WPSEO_Options', 'AIOSEO\\Plugin\\Common\\Main', 'RankMath\\Helper', 'The_SEO_Framework\\Load' ) as $class ) {
+			if ( class_exists( $class, false ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

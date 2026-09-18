@@ -48,6 +48,7 @@ class Main {
 	 */
 	private function load_dependencies() {
 		require_once SHARENIVO_PLUGIN_DIR . 'includes/class-networks.php';
+		require_once SHARENIVO_PLUGIN_DIR . 'includes/class-share-meta.php';
 		require_once SHARENIVO_PLUGIN_DIR . 'includes/class-renderer.php';
 		require_once SHARENIVO_PLUGIN_DIR . 'includes/admin/class-admin.php';
 		require_once SHARENIVO_PLUGIN_DIR . 'includes/admin/class-settings.php';

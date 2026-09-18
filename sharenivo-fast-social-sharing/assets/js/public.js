@@ -196,12 +196,22 @@
 			return;
 		}
 		var minimum = parseInt(config.media.minWidth, 10) || 300;
+		var minimumHeight = parseInt(config.media.minHeight, 10) || 180;
+		var imageSource = config.media.imageSource || 'current';
+		var descriptionSource = config.media.descriptionSource || 'alt';
 		var pageUrl = window.location.href.split('#')[0];
-		var title = document.title;
+		var featuredImage = template.dataset.featuredImage || '';
+		var postImage = template.dataset.postImage || '';
+		var postDescription = template.dataset.postDescription || '';
+		var shareTitle = template.dataset.shareTitle || document.title;
+		var shareDescription = template.dataset.shareDescription || shareTitle;
 
 		document.querySelectorAll('.entry-content img, .wp-block-post-content img, article img').forEach(function (image) {
 			var attach = function () {
-				if (image.dataset.sharenivoReady || Math.max(image.naturalWidth, image.clientWidth) < minimum || closest(image, '.sharenivo-media-tools')) {
+				var width = Math.max(image.naturalWidth || 0, image.clientWidth || 0);
+				var height = Math.max(image.naturalHeight || 0, image.clientHeight || 0);
+				var optedOut = image.classList.contains('no_pin') || image.classList.contains('no-pin') || image.classList.contains('sharenivo-no-media-share') || image.hasAttribute('data-sharenivo-no-media-share') || closest(image, '[data-sharenivo-no-media-share]');
+				if (image.dataset.sharenivoReady || optedOut || width < minimum || height < minimumHeight || closest(image, '.sharenivo-media-tools')) {
 					return;
 				}
 				var host = closest(image, 'figure') || image.parentElement;
@@ -215,7 +225,22 @@
 				});
 				var pinterest = tools.querySelector('[data-sharenivo-network="pinterest"]');
 				if (pinterest) {
-					pinterest.href = 'https://www.pinterest.com/pin/create/button/?url=' + encodeURIComponent(pageUrl) + '&media=' + encodeURIComponent(image.currentSrc || image.src) + '&description=' + encodeURIComponent(title);
+					var currentImage = image.dataset.media || image.dataset.lazySrc || image.currentSrc || image.src;
+					var media = currentImage;
+					if ('featured' === imageSource && featuredImage) {
+						media = featuredImage;
+					} else if ('post' === imageSource && (postImage || featuredImage)) {
+						media = postImage || featuredImage;
+					}
+					var description = image.getAttribute('alt') || '';
+					if ('title' === descriptionSource) {
+						description = image.getAttribute('title') || description;
+					} else if ('post' === descriptionSource) {
+						description = postDescription || shareDescription;
+					} else if ('share' === descriptionSource) {
+						description = shareDescription || shareTitle;
+					}
+					pinterest.href = 'https://www.pinterest.com/pin/create/button/?url=' + encodeURIComponent(pageUrl) + '&media=' + encodeURIComponent(media) + '&description=' + encodeURIComponent(description || shareTitle);
 				}
 				host.appendChild(tools);
 				image.dataset.sharenivoReady = '1';

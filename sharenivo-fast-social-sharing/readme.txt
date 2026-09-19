@@ -107,6 +107,7 @@ Yes. Controls have accessible names and focus states, popup focus is contained, 
 == Changelog ==
 
 = 2.2.0 =
+* Refined the responsive Locations dashboard so each placement card uses its natural height without large empty areas.
 * Added per-post custom share title, description, X text, Pinterest image, and Pinterest description fields.
 * Added optional duplicate-safe Open Graph and X preview metadata without tracking or remote requests.
 * Added an accessible Click-to-Share Quote block and shortcode with four original local styles.

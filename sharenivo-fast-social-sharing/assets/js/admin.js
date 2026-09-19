@@ -7,6 +7,22 @@
 	var strings = window.sharenivoAdmin || {};
 	var $form = $('.sharenivo-settings-form');
 
+	function getStoredTab() {
+		try {
+			return window.sessionStorage.getItem('sharenivoAdminTab');
+		} catch (error) {
+			return '';
+		}
+	}
+
+	function storeTab(tab) {
+		try {
+			window.sessionStorage.setItem('sharenivoAdminTab', tab);
+		} catch (error) {
+			// Tab persistence is optional; the dashboard remains fully usable without storage.
+		}
+	}
+
 	function activateTab(tab) {
 		var $button = $('.sharenivo-tabs__button[data-tab="' + tab + '"]');
 		var $panel = $('.sharenivo-panel[data-panel="' + tab + '"]');
@@ -17,7 +33,7 @@
 		$('.sharenivo-panel').removeClass('is-active').prop('hidden', true);
 		$button.addClass('is-active').attr('aria-selected', 'true');
 		$panel.addClass('is-active').prop('hidden', false);
-		window.sessionStorage.setItem('sharenivoAdminTab', tab);
+		storeTab(tab);
 	}
 
 	function selectedNetworks() {
@@ -109,7 +125,7 @@
 	$('.sharenivo-tabs__button').on('click', function () {
 		activateTab($(this).data('tab'));
 	});
-	var storedTab = window.sessionStorage.getItem('sharenivoAdminTab');
+	var storedTab = getStoredTab();
 	if (storedTab) {
 		activateTab(storedTab);
 	}

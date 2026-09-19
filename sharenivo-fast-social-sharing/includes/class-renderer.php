@@ -280,6 +280,7 @@ class Renderer {
 		 * @param array  $settings Normalized settings.
 		 */
 		$html = apply_filters( 'sharenivo_button_html', $html, $network, $url, $this->settings );
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Retained for backward compatibility with existing ShareNova integrations.
 		return apply_filters( 'sharenova_button_html', $html, $network, $url, $this->settings );
 	}
 

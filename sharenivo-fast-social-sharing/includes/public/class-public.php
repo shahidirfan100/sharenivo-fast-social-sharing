@@ -367,7 +367,29 @@ class PublicDisplay {
 			return false;
 		}
 		$content = $post->post_content;
-		return has_shortcode( $content, 'sharenivo_share' ) || has_shortcode( $content, 'sharenivo_follow' ) || has_shortcode( $content, 'sharenova_share' ) || has_shortcode( $content, 'sharenivo_quote' ) || has_shortcode( $content, 'sharenivo_click_to_share' ) || ( function_exists( 'has_block' ) && ( has_block( 'sharenivo/share-buttons', $content ) || has_block( 'sharenivo/follow-links', $content ) || has_block( 'wssp/share-buttons', $content ) || has_block( 'sharenivo/share-quote', $content ) ) );
+
+		// Avoid running repeated shortcode/block regexes on ordinary post content.
+		if ( false === strpos( $content, 'sharenivo' ) && false === strpos( $content, 'sharenova_share' ) && false === strpos( $content, 'wssp/share-buttons' ) ) {
+			return false;
+		}
+
+		$shortcodes = array( 'sharenivo_share', 'sharenivo_follow', 'sharenova_share', 'sharenivo_quote', 'sharenivo_click_to_share' );
+		foreach ( $shortcodes as $shortcode ) {
+			if ( false !== strpos( $content, '[' . $shortcode ) && has_shortcode( $content, $shortcode ) ) {
+				return true;
+			}
+		}
+
+		if ( function_exists( 'has_block' ) ) {
+			$blocks = array( 'sharenivo/share-buttons', 'sharenivo/follow-links', 'wssp/share-buttons', 'sharenivo/share-quote' );
+			foreach ( $blocks as $block ) {
+				if ( false !== strpos( $content, '<!-- wp:' . $block ) && has_block( $block, $content ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**

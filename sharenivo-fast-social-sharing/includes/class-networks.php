@@ -48,6 +48,7 @@ class Networks {
 		 * @param array $networks Network registry.
 		 */
 		$filtered = apply_filters( 'sharenivo_networks', $networks );
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Retained for backward compatibility with existing ShareNova integrations.
 		$filtered = apply_filters( 'sharenova_networks', $filtered );
 		if ( ! is_array( $filtered ) ) {
 			return $networks;

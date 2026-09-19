@@ -160,6 +160,7 @@ class Settings {
 		 * @param array $settings ShareNivo settings.
 		 */
 		$settings = apply_filters( 'sharenivo_settings', $settings );
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Retained for backward compatibility with existing ShareNova integrations.
 		$settings = apply_filters( 'sharenova_settings', $settings );
 
 		return is_array( $settings ) ? self::sanitize_settings( self::normalize_settings( $settings ) ) : self::get_defaults();

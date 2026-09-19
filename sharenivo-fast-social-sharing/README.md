@@ -1,4 +1,4 @@
-# ShareNivo 2.2.0
+# ShareNivo 2.2.1
 
 ShareNivo is a privacy-first WordPress social sharing and follow plugin. It provides flexible placements through original ShareNivo code and design, without social SDKs, analytics beacons, remote assets, or share-count requests.
 
@@ -104,7 +104,7 @@ Version 2.0 migrates 1.x options into a nested, allowlisted settings schema whil
 
 ## Compatibility
 
-The 2.2.0 release is tested up to WordPress 7.1 and requires WordPress 6.0 or newer and PHP 7.4 or newer. ShareNivo uses WordPress core APIs for settings, blocks, widgets, shortcodes, metadata, and asset loading. It makes no automatic external HTTP requests.
+The 2.2.1 release is tested up to WordPress 7.1.1 and requires WordPress 6.0 or newer and PHP 7.4 or newer. ShareNivo uses WordPress core APIs for settings, blocks, widgets, shortcodes, metadata, and asset loading. It makes no automatic external HTTP requests.
 
 ## Privacy and external services
 

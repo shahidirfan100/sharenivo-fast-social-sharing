@@ -4,7 +4,7 @@ Tags: social share, share buttons, social media, privacy, lightweight
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -106,6 +106,12 @@ Yes. Controls have accessible names and focus states, popup focus is contained, 
 
 == Changelog ==
 
+= 2.2.1 =
+* Avoid repeated shortcode and block parsing on ordinary frontend post content to reduce unnecessary work.
+* Sanitize and type-check each per-post sharing field before saving; malformed values are ignored.
+* Keep the admin settings interface usable when browser session storage is unavailable.
+* Preserve ShareNova compatibility hooks and document the narrowly scoped legacy-name exceptions.
+
 = 2.2.0 =
 * Refined the responsive Locations dashboard so each placement card uses its natural height without large empty areas.
 * Added per-post custom share title, description, X text, Pinterest image, and Pinterest description fields.
@@ -156,6 +162,9 @@ Yes. Controls have accessible names and focus states, popup focus is contained, 
 * Preserved ShareNova upgrade compatibility.
 
 == Upgrade Notice ==
+
+= 2.2.1 =
+Improves frontend asset detection and hardens post metadata and admin behavior without changing existing settings or compatibility hooks.
 
 = 2.2.0 =
 Adds privacy-safe per-post sharing data, quote sharing, advanced image controls, floating-rail styling, and flexible share shortcodes. Existing settings and compatibility names are preserved.

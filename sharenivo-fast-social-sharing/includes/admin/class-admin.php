@@ -189,7 +189,15 @@ class Admin {
 		$allowed   = array( 'floating', 'inline', 'sticky', 'popup', 'flyin', 'media' );
 		$locations = isset( $_POST['sharenivo_override']['locations'] ) && is_array( $_POST['sharenivo_override']['locations'] ) ? array_map( 'sanitize_key', wp_unslash( $_POST['sharenivo_override']['locations'] ) ) : array();
 		$locations = array_values( array_intersect( $allowed, $locations ) );
-		$share_meta_input = isset( $_POST['sharenivo_share_meta'] ) && is_array( $_POST['sharenivo_share_meta'] ) ? wp_unslash( $_POST['sharenivo_share_meta'] ) : array();
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each allowlisted field is type-checked and sanitized below before storage.
+		$share_meta_raw = isset( $_POST['sharenivo_share_meta'] ) && is_array( $_POST['sharenivo_share_meta'] ) ? wp_unslash( $_POST['sharenivo_share_meta'] ) : array();
+		$share_meta_input = array(
+			'title'                 => isset( $share_meta_raw['title'] ) && is_string( $share_meta_raw['title'] ) ? sanitize_text_field( $share_meta_raw['title'] ) : '',
+			'description'           => isset( $share_meta_raw['description'] ) && is_string( $share_meta_raw['description'] ) ? sanitize_textarea_field( $share_meta_raw['description'] ) : '',
+			'x_text'                => isset( $share_meta_raw['x_text'] ) && is_string( $share_meta_raw['x_text'] ) ? sanitize_text_field( $share_meta_raw['x_text'] ) : '',
+			'pinterest_image'       => isset( $share_meta_raw['pinterest_image'] ) && is_string( $share_meta_raw['pinterest_image'] ) ? esc_url_raw( $share_meta_raw['pinterest_image'] ) : '',
+			'pinterest_description' => isset( $share_meta_raw['pinterest_description'] ) && is_string( $share_meta_raw['pinterest_description'] ) ? sanitize_textarea_field( $share_meta_raw['pinterest_description'] ) : '',
+		);
 		$share_meta       = Share_Meta::sanitize( $share_meta_input );
 		if ( Share_Meta::has_values( $share_meta ) ) {
 			update_post_meta( $post_id, Share_Meta::META_KEY, $share_meta );

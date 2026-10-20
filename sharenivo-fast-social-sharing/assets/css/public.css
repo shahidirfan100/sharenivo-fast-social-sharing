@@ -135,6 +135,8 @@
 .sharenivo-button--bluesky { --sn-network: #1185fe; }
 .sharenivo-button--telegram { --sn-network: #229ed9; }
 .sharenivo-button--reddit { --sn-network: #ff4500; }
+.sharenivo-button--line { --sn-network: #00b900; }
+.sharenivo-button--snapchat { --sn-network: #fffc00; }
 .sharenivo-button--email { --sn-network: #64748b; }
 .sharenivo-button--copy,
 .sharenivo-button--more { --sn-network: var(--sn-brand, #3a1f4f); }
@@ -159,6 +161,11 @@
 	border-color: var(--sn-brand, #3a1f4f);
 	background: #fff7f5;
 	color: var(--sn-brand, #3a1f4f);
+}
+
+.sharenivo-color--network .sharenivo-button--line,
+.sharenivo-color--network .sharenivo-button--snapchat {
+	--sn-icon: #171717;
 }
 
 .sharenivo-color--outline .sharenivo-button {
@@ -192,6 +199,24 @@
 	border-color: var(--sn-brand-hover, #ff5a4f);
 	background: var(--sn-brand-hover, #ff5a4f);
 	color: var(--sn-icon, #fff);
+}
+.sharenivo-color--network.sharenivo-hover-colors--individual .sharenivo-button--line:hover,
+.sharenivo-color--network.sharenivo-hover-colors--individual .sharenivo-button--line:focus-visible,
+.sharenivo-color--network.sharenivo-hover-colors--individual .sharenivo-button--snapchat:hover,
+.sharenivo-color--network.sharenivo-hover-colors--individual .sharenivo-button--snapchat:focus-visible {
+	color: #171717;
+}
+.sharenivo-color--outline .sharenivo-button--line,
+.sharenivo-color--outline .sharenivo-button--snapchat {
+	border-color: #171717;
+	color: #171717;
+}
+.sharenivo-color--outline .sharenivo-button--line:hover,
+.sharenivo-color--outline .sharenivo-button--line:focus-visible,
+.sharenivo-color--outline .sharenivo-button--snapchat:hover,
+.sharenivo-color--outline .sharenivo-button--snapchat:focus-visible {
+	background: #171717;
+	color: #fff;
 }
 
 .sharenivo-hover--lift .sharenivo-button:hover { transform: translateY(-3px); }
@@ -474,6 +499,13 @@
 	transition: transform .18s ease, opacity .18s ease;
 }
 .sharenivo-follow__link:hover { transform: translateY(-2px); opacity: .9; }
+.sharenivo-follow__link:focus-visible { outline: 3px solid #3a1f4f; outline-offset: 3px; }
+.sharenivo-follow__link.sharenivo-button--snapchat,
+.sharenivo-follow__link.sharenivo-button--line,
+.sharenivo-follow__link.sharenivo-button--patreon,
+.sharenivo-follow__link.sharenivo-button--vimeo,
+.sharenivo-follow__link.sharenivo-button--substack { color: #171717 !important; }
+.sharenivo-follow__link.sharenivo-button--mastodon { color: #000 !important; }
 .sharenivo-follow__link span,
 .sharenivo-follow__link svg { display: block; width: 18px; height: 18px; }
 .sharenivo-follow__link b { font-weight: 650; }

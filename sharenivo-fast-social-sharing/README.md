@@ -1,4 +1,4 @@
-# ShareNivo 2.2.1
+# ShareNivo 2.2.2
 
 ShareNivo is a privacy-first WordPress social sharing and follow plugin. It provides flexible placements through original ShareNivo code and design, without social SDKs, analytics beacons, remote assets, or share-count requests.
 
@@ -21,9 +21,11 @@ Network, ShareNivo brand, and minimal monochrome color systems are available. Mo
 
 ## Supported sharing options
 
-Facebook, X, LinkedIn, WhatsApp, Pinterest, Threads, Bluesky, Telegram, Reddit, Email, and Copy Link.
+Facebook, X, LinkedIn, WhatsApp, Pinterest, Threads, Bluesky, Telegram, Reddit, LINE, Snapchat, Email, and Copy Link.
 
 ShareNivo builds browser sharing links locally. It does not fetch share counts or connect to network APIs in the background.
+
+Follow profiles support Facebook, X, LinkedIn, WhatsApp Channels, Pinterest, Threads, Bluesky, Telegram, Reddit, LINE, Instagram, YouTube, TikTok, GitHub, Mastodon, Snapchat, Twitch, Discord, Patreon, Vimeo, Medium, and Substack. Profile URLs are entered by the site owner and stored in WordPress. ShareNivo does not request profile data; the visitor's browser opens the destination only after a deliberate click.
 
 ## Placements and triggers
 
@@ -104,8 +106,8 @@ Version 2.0 migrates 1.x options into a nested, allowlisted settings schema whil
 
 ## Compatibility
 
-The 2.2.1 release is tested up to WordPress 7.1.1 and requires WordPress 6.0 or newer and PHP 7.4 or newer. ShareNivo uses WordPress core APIs for settings, blocks, widgets, shortcodes, metadata, and asset loading. It makes no automatic external HTTP requests.
+The 2.2.2 release was installed, activated, and exercised on WordPress 7.1.3 with PHP 8.3. Its declared minimums remain WordPress 6.0 and PHP 7.4. ShareNivo uses WordPress core APIs for settings, blocks, widgets, shortcodes, metadata, and asset loading. It makes no automatic external HTTP requests.
 
 ## Privacy and external services
 
-ShareNivo does not collect analytics, send visitor data, load social SDKs, fetch share counts, or download remote assets. External social networks are contacted only when a visitor deliberately clicks a sharing or follow link. The destination network's terms and privacy policy then apply.
+ShareNivo does not collect analytics, load social SDKs, fetch share counts, or download remote assets. It makes no automatic requests to social networks. A deliberate share click opens the selected network with the current page URL and supported title or text; a follow click opens the site owner's profile URL. The destination receives a request only after that click, and its terms and privacy policy apply.

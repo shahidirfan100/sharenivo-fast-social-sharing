@@ -406,7 +406,7 @@ class Settings {
 		if ( isset( $follow['profiles'] ) && is_array( $follow['profiles'] ) ) {
 			foreach ( $follow['profiles'] as $network => $profile_url ) {
 				$network = sanitize_key( $network );
-				$url     = esc_url_raw( $profile_url );
+				$url     = is_string( $profile_url ) ? esc_url_raw( $profile_url ) : '';
 				if ( isset( $allowed_profiles[ $network ] ) && $url ) {
 					$profiles[ $network ] = $url;
 				}
@@ -448,6 +448,9 @@ class Settings {
 		$settings        = self::get_settings();
 		$share_networks  = Networks::get_share_networks();
 		$follow_networks = Networks::get_follow_networks();
+		$share_network_count = count( $settings['networks'] );
+		$enabled_location_count = self::count_active_locations( $settings['locations'] );
+		$follow_profile_count = count( $settings['follow']['profiles'] );
 		$post_types      = get_post_types( array( 'public' => true ), 'objects' );
 		unset( $post_types['attachment'] );
 		?>
@@ -460,11 +463,11 @@ class Settings {
 					<span class="sharenivo-brand__mark" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="13" cy="14" r="7"/><circle cx="35" cy="10" r="6"/><circle cx="34" cy="36" r="8"/><path d="m19 13 10-2M17 19l12 12"/></svg></span>
 					<div><h1><?php esc_html_e( 'ShareNivo', 'sharenivo-fast-social-sharing' ); ?></h1><p><?php esc_html_e( 'Fast social reach. Zero tracking. Your design.', 'sharenivo-fast-social-sharing' ); ?></p></div>
 				</div>
-				<div class="sharenivo-admin__status"><span><?php esc_html_e( 'No external requests', 'sharenivo-fast-social-sharing' ); ?></span><strong>v<?php echo esc_html( SHARENIVO_VERSION ); ?></strong></div>
+				<div class="sharenivo-admin__status"><span><?php esc_html_e( 'No automatic external requests', 'sharenivo-fast-social-sharing' ); ?></span><strong>v<?php echo esc_html( SHARENIVO_VERSION ); ?></strong></div>
 			</header>
 
 			<div class="sharenivo-admin__shell">
-				<nav class="sharenivo-tabs" aria-label="<?php esc_attr_e( 'ShareNivo settings', 'sharenivo-fast-social-sharing' ); ?>">
+				<nav class="sharenivo-tabs" role="tablist" aria-label="<?php esc_attr_e( 'ShareNivo settings', 'sharenivo-fast-social-sharing' ); ?>">
 					<?php
 					$tabs = array(
 						'overview'  => __( 'Overview', 'sharenivo-fast-social-sharing' ),
@@ -476,7 +479,7 @@ class Settings {
 					);
 					foreach ( $tabs as $tab => $label ) :
 						?>
-						<button type="button" class="sharenivo-tabs__button<?php echo esc_attr( 'overview' === $tab ? ' is-active' : '' ); ?>" data-tab="<?php echo esc_attr( $tab ); ?>" aria-selected="<?php echo esc_attr( 'overview' === $tab ? 'true' : 'false' ); ?>"><?php echo esc_html( $label ); ?></button>
+						<button type="button" id="sharenivo-tab-<?php echo esc_attr( $tab ); ?>" class="sharenivo-tabs__button<?php echo esc_attr( 'overview' === $tab ? ' is-active' : '' ); ?>" data-tab="<?php echo esc_attr( $tab ); ?>" role="tab" aria-controls="sharenivo-panel-<?php echo esc_attr( $tab ); ?>" aria-selected="<?php echo esc_attr( 'overview' === $tab ? 'true' : 'false' ); ?>" tabindex="<?php echo esc_attr( 'overview' === $tab ? '0' : '-1' ); ?>"><?php echo esc_html( $label ); ?></button>
 					<?php endforeach; ?>
 				</nav>
 
@@ -484,25 +487,68 @@ class Settings {
 					<?php wp_nonce_field( 'sharenivo_save_settings', 'sharenivo_settings_nonce' ); ?>
 					<input type="hidden" name="action" value="sharenivo_save_settings_action">
 
-					<section class="sharenivo-panel is-active" data-panel="overview">
+					<section class="sharenivo-panel is-active" id="sharenivo-panel-overview" data-panel="overview" role="tabpanel" aria-labelledby="sharenivo-tab-overview" tabindex="0">
 						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Control center', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'ShareNivo at a glance', 'sharenivo-fast-social-sharing' ); ?></h2></div></div>
 						<div class="sharenivo-metrics">
-							<div><strong><?php echo esc_html( count( $settings['networks'] ) ); ?></strong><span><?php esc_html_e( 'Active share options', 'sharenivo-fast-social-sharing' ); ?></span></div>
-							<div><strong><?php echo esc_html( self::count_active_locations( $settings['locations'] ) ); ?></strong><span><?php esc_html_e( 'Enabled locations', 'sharenivo-fast-social-sharing' ); ?></span></div>
-							<div><strong>0</strong><span><?php esc_html_e( 'Tracking requests', 'sharenivo-fast-social-sharing' ); ?></span></div>
+							<div><strong><?php echo esc_html( $share_network_count ); ?></strong><span><?php esc_html_e( 'Active share options', 'sharenivo-fast-social-sharing' ); ?></span></div>
+							<div><strong><?php echo esc_html( $enabled_location_count ); ?></strong><span><?php esc_html_e( 'Enabled locations', 'sharenivo-fast-social-sharing' ); ?></span></div>
+							<div><strong><?php echo esc_html( $follow_profile_count ); ?></strong><span><?php esc_html_e( 'Follow profiles added', 'sharenivo-fast-social-sharing' ); ?></span></div>
 						</div>
 						<div class="sharenivo-card sharenivo-master-card">
 							<div><h3><?php esc_html_e( 'Master switch', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'Pause all ShareNivo output without losing your configuration.', 'sharenivo-fast-social-sharing' ); ?></p></div>
 							<?php self::render_toggle( 'sharenivo_settings[enabled]', $settings['enabled'], __( 'Enable ShareNivo', 'sharenivo-fast-social-sharing' ) ); ?>
 						</div>
-						<div class="sharenivo-feature-grid">
-							<div class="sharenivo-card"><span class="sharenivo-card__icon">01</span><h3><?php esc_html_e( 'Multiple placements', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'Use inline, floating, mobile sticky, popup, fly-in, and media sharing together.', 'sharenivo-fast-social-sharing' ); ?></p></div>
-							<div class="sharenivo-card"><span class="sharenivo-card__icon">02</span><h3><?php esc_html_e( 'Smart local triggers', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'Trigger prompts by time, scroll, reading completion, inactivity, comments, or purchases.', 'sharenivo-fast-social-sharing' ); ?></p></div>
-							<div class="sharenivo-card"><span class="sharenivo-card__icon">03</span><h3><?php esc_html_e( 'Privacy by design', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'No API calls, tracking pixels, remote fonts, share counts, or analytics beacons.', 'sharenivo-fast-social-sharing' ); ?></p></div>
+						<div class="sharenivo-setup-heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Quick setup', 'sharenivo-fast-social-sharing' ); ?></span><h3><?php esc_html_e( 'Make sharing yours', 'sharenivo-fast-social-sharing' ); ?></h3></div><p><?php esc_html_e( 'Start with the essentials. Your choices are saved in WordPress and can be changed any time.', 'sharenivo-fast-social-sharing' ); ?></p></div>
+						<div class="sharenivo-setup-grid">
+							<article class="sharenivo-setup-card<?php echo esc_attr( $share_network_count ? ' is-ready' : '' ); ?>">
+								<div class="sharenivo-setup-card__top">
+									<span class="sharenivo-setup-card__step" aria-hidden="true">01</span>
+									<span class="sharenivo-setup-card__status">
+										<?php
+										$network_status = __( 'Choose networks', 'sharenivo-fast-social-sharing' );
+										if ( $share_network_count ) {
+											$network_status = sprintf(
+												/* translators: %d: Number of selected sharing networks. */
+												_n( '%d network selected', '%d networks selected', $share_network_count, 'sharenivo-fast-social-sharing' ),
+												$share_network_count
+											);
+										}
+										echo esc_html( $network_status );
+									?>
+									</span>
+								</div>
+								<h3><?php esc_html_e( 'Choose networks', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'Select the sharing options visitors can use on your site.', 'sharenivo-fast-social-sharing' ); ?></p>
+								<button type="button" class="sharenivo-setup-card__button" data-open-tab="networks"><?php esc_html_e( 'Select networks', 'sharenivo-fast-social-sharing' ); ?><span aria-hidden="true">→</span></button>
+							</article>
+							<article class="sharenivo-setup-card<?php echo esc_attr( $enabled_location_count ? ' is-ready' : '' ); ?>">
+								<div class="sharenivo-setup-card__top">
+									<span class="sharenivo-setup-card__step" aria-hidden="true">02</span>
+									<span class="sharenivo-setup-card__status">
+										<?php
+										$location_status = __( 'Choose placements', 'sharenivo-fast-social-sharing' );
+										if ( $enabled_location_count ) {
+											$location_status = sprintf(
+												/* translators: %d: Number of enabled sharing locations. */
+												_n( '%d location active', '%d locations active', $enabled_location_count, 'sharenivo-fast-social-sharing' ),
+												$enabled_location_count
+											);
+										}
+										echo esc_html( $location_status );
+									?>
+									</span>
+								</div>
+								<h3><?php esc_html_e( 'Choose placements', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'Decide where buttons appear, from post content to mobile bars.', 'sharenivo-fast-social-sharing' ); ?></p>
+								<button type="button" class="sharenivo-setup-card__button" data-open-tab="locations"><?php esc_html_e( 'Set placements', 'sharenivo-fast-social-sharing' ); ?><span aria-hidden="true">→</span></button>
+							</article>
+							<article class="sharenivo-setup-card is-ready">
+								<div class="sharenivo-setup-card__top"><span class="sharenivo-setup-card__step" aria-hidden="true">03</span><span class="sharenivo-setup-card__status"><?php esc_html_e( 'Defaults active', 'sharenivo-fast-social-sharing' ); ?></span></div>
+								<h3><?php esc_html_e( 'Personalize design', 'sharenivo-fast-social-sharing' ); ?></h3><p><?php esc_html_e( 'The plum and coral defaults are ready. Adjust shape, spacing, labels, and motion whenever you like.', 'sharenivo-fast-social-sharing' ); ?></p>
+								<button type="button" class="sharenivo-setup-card__button" data-open-tab="design"><?php esc_html_e( 'Customize design', 'sharenivo-fast-social-sharing' ); ?><span aria-hidden="true">→</span></button>
+							</article>
 						</div>
 					</section>
 
-					<section class="sharenivo-panel" data-panel="networks" hidden>
+					<section class="sharenivo-panel" id="sharenivo-panel-networks" data-panel="networks" role="tabpanel" aria-labelledby="sharenivo-tab-networks" tabindex="0" hidden>
 						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( '2026-ready', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Sharing networks', 'sharenivo-fast-social-sharing' ); ?></h2><p><?php esc_html_e( 'Only networks with current browser sharing flows are included.', 'sharenivo-fast-social-sharing' ); ?></p></div></div>
 						<div class="sharenivo-network-grid">
 							<?php foreach ( $share_networks as $network => $data ) : $checked = in_array( $network, $settings['networks'], true ); ?>
@@ -520,7 +566,7 @@ class Settings {
 						</ol><input type="hidden" id="sharenivo-network-order" name="sharenivo_settings[network_order]" value="<?php echo esc_attr( implode( ',', $settings['network_order'] ) ); ?>"></div>
 					</section>
 
-					<section class="sharenivo-panel" data-panel="locations" hidden>
+					<section class="sharenivo-panel" id="sharenivo-panel-locations" data-panel="locations" role="tabpanel" aria-labelledby="sharenivo-tab-locations" tabindex="0" hidden>
 						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Placement engine', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Choose where sharing appears', 'sharenivo-fast-social-sharing' ); ?></h2></div></div>
 						<div class="sharenivo-location-grid">
 							<?php self::render_location_card( 'floating', __( 'Floating rail', 'sharenivo-fast-social-sharing' ), __( 'Persistent desktop sharing on the left or right edge.', 'sharenivo-fast-social-sharing' ), $settings ); ?>
@@ -532,7 +578,7 @@ class Settings {
 						</div>
 					</section>
 
-					<section class="sharenivo-panel" data-panel="design" hidden>
+					<section class="sharenivo-panel" id="sharenivo-panel-design" data-panel="design" role="tabpanel" aria-labelledby="sharenivo-tab-design" tabindex="0" hidden>
 						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Original ShareNivo system', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Design and motion', 'sharenivo-fast-social-sharing' ); ?></h2></div></div>
 						<div class="sharenivo-design-layout"><div class="sharenivo-card sharenivo-fields">
 							<?php self::render_select_field( __( 'Button shape', 'sharenivo-fast-social-sharing' ), 'sharenivo_settings[style][shape]', $settings['style']['shape'], array( 'circle' => __( 'Circle', 'sharenivo-fast-social-sharing' ), 'rounded' => __( 'Rounded', 'sharenivo-fast-social-sharing' ), 'square' => __( 'Square', 'sharenivo-fast-social-sharing' ), 'pill' => __( 'Pill', 'sharenivo-fast-social-sharing' ), 'soft' => __( 'Soft', 'sharenivo-fast-social-sharing' ), 'leaf' => __( 'Leaf', 'sharenivo-fast-social-sharing' ) ) ); ?>
@@ -549,21 +595,24 @@ class Settings {
 						</div><div class="sharenivo-preview"><span><?php esc_html_e( 'Live preview', 'sharenivo-fast-social-sharing' ); ?></span><div class="sharenivo-preview__canvas"><div class="sharenivo-preview__buttons"><i class="is-facebook"><?php echo wp_kses( Networks::get_icon( 'facebook' ), self::svg_allowed_html() ); ?></i><i class="is-x"><?php echo wp_kses( Networks::get_icon( 'x' ), self::svg_allowed_html() ); ?></i><i class="is-linkedin"><?php echo wp_kses( Networks::get_icon( 'linkedin' ), self::svg_allowed_html() ); ?></i></div></div></div></div>
 					</section>
 
-					<section class="sharenivo-panel" data-panel="follow" hidden>
-						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Audience growth', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Social follow profiles', 'sharenivo-fast-social-sharing' ); ?></h2><p><?php esc_html_e( 'Profile links are rendered locally through the Follow block, widget, shortcode, or action.', 'sharenivo-fast-social-sharing' ); ?></p></div></div>
+					<section class="sharenivo-panel" id="sharenivo-panel-follow" data-panel="follow" role="tabpanel" aria-labelledby="sharenivo-tab-follow" tabindex="0" hidden>
+						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Audience growth', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Social follow profiles', 'sharenivo-fast-social-sharing' ); ?></h2><p><?php esc_html_e( 'Add links to your profiles. ShareNivo stores them in WordPress and never looks them up or contacts them automatically.', 'sharenivo-fast-social-sharing' ); ?></p></div></div>
 						<div class="sharenivo-card sharenivo-fields">
 							<?php self::render_toggle( 'sharenivo_settings[follow][enabled]', $settings['follow']['enabled'], __( 'Enable follow tools', 'sharenivo-fast-social-sharing' ) ); ?>
 							<div class="sharenivo-field"><label><?php esc_html_e( 'Heading', 'sharenivo-fast-social-sharing' ); ?><input type="text" name="sharenivo_settings[follow][heading]" value="<?php echo esc_attr( $settings['follow']['heading'] ); ?>"></label></div>
 							<div class="sharenivo-profile-grid">
 							<?php foreach ( $follow_networks as $network => $data ) : ?>
-								<label><span style="--network-color:<?php echo esc_attr( $data['color'] ); ?>"><?php echo wp_kses( Networks::get_icon( $network ), self::svg_allowed_html() ); ?></span><b><?php echo esc_html( $data['label'] ); ?></b><input type="url" name="sharenivo_settings[follow][profiles][<?php echo esc_attr( $network ); ?>]" value="<?php echo esc_attr( $settings['follow']['profiles'][ $network ] ?? '' ); ?>" placeholder="https://"></label>
+								<div class="sharenivo-profile-card" data-network="<?php echo esc_attr( $network ); ?>">
+									<label class="sharenivo-profile-card__label" for="sharenivo-profile-<?php echo esc_attr( $network ); ?>"><span class="sharenivo-profile-card__icon" aria-hidden="true" style="--network-color:<?php echo esc_attr( $data['color'] ); ?>"><?php echo wp_kses( Networks::get_icon( $network ), self::svg_allowed_html() ); ?></span><span><?php echo esc_html( $data['label'] ); ?></span></label>
+									<input id="sharenivo-profile-<?php echo esc_attr( $network ); ?>" type="url" name="sharenivo_settings[follow][profiles][<?php echo esc_attr( $network ); ?>]" value="<?php echo esc_attr( $settings['follow']['profiles'][ $network ] ?? '' ); ?>" placeholder="https://" autocomplete="url" aria-describedby="sharenivo-profile-help">
+								</div>
 							<?php endforeach; ?>
 							</div>
-							<p class="description"><?php esc_html_e( 'Use [sharenivo_follow] or the ShareNivo Follow widget. Empty profiles are never rendered.', 'sharenivo-fast-social-sharing' ); ?></p>
+							<p class="description" id="sharenivo-profile-help"><?php esc_html_e( 'Add a full profile URL. Empty profiles are not shown. A network is contacted only after a visitor follows a link.', 'sharenivo-fast-social-sharing' ); ?> <?php esc_html_e( 'Use [sharenivo_follow], the Follow block, or the ShareNivo Follow widget to display your links.', 'sharenivo-fast-social-sharing' ); ?></p>
 						</div>
 					</section>
 
-					<section class="sharenivo-panel" data-panel="advanced" hidden>
+					<section class="sharenivo-panel" id="sharenivo-panel-advanced" data-panel="advanced" role="tabpanel" aria-labelledby="sharenivo-tab-advanced" tabindex="0" hidden>
 						<div class="sharenivo-panel__heading"><div><span class="sharenivo-eyebrow"><?php esc_html_e( 'Rules and portability', 'sharenivo-fast-social-sharing' ); ?></span><h2><?php esc_html_e( 'Advanced settings', 'sharenivo-fast-social-sharing' ); ?></h2></div></div>
 						<div class="sharenivo-card sharenivo-fields">
 							<h3><?php esc_html_e( 'Content types', 'sharenivo-fast-social-sharing' ); ?></h3><div class="sharenivo-checkbox-grid">

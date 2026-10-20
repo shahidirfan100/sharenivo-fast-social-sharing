@@ -1,4 +1,4 @@
-# ShareNivo 2.0 User Guide
+# ShareNivo 2.2.2 User Guide
 
 ShareNivo adds fast social sharing and follow tools without loading social SDKs, remote fonts, tracking pixels, analytics beacons, or share-count APIs.
 
@@ -17,7 +17,7 @@ The Overview tab confirms:
 
 - how many sharing options are active;
 - how many display locations are enabled;
-- that ShareNivo makes zero automatic tracking requests;
+- that ShareNivo makes no automatic external requests;
 - whether the master switch is enabled.
 
 Use the master switch to temporarily hide all ShareNivo output without deleting your configuration.
@@ -26,7 +26,7 @@ Use the master switch to temporarily hide all ShareNivo output without deleting 
 
 ![ShareNivo sharing network selector](assets/screenshot-2.png)
 
-Open the **Networks** tab and select only the destinations your visitors use. ShareNivo 2.0 includes Facebook, X, LinkedIn, WhatsApp, Pinterest, Threads, Bluesky, Telegram, Reddit, Email, and Copy Link.
+Open the **Networks** tab and select only the destinations your visitors use. ShareNivo 2.2.2 includes Facebook, X, LinkedIn, WhatsApp, Pinterest, Threads, Bluesky, Telegram, Reddit, LINE, Snapchat, Email, and Copy Link.
 
 Use the up and down controls under **Display order** to define the order shown on the site. Keeping four to six primary networks usually provides a cleaner interface. When the **More** button is enabled, additional networks move into an expandable panel.
 
@@ -86,7 +86,11 @@ Full-screen mobile buttons should occupy equal columns without a scrollbar. Comp
 
 ## Follow links
 
+![ShareNivo follow profile settings](assets/screenshot-6.png)
+
 Open **Follow**, enable follow tools, enter a heading, and add complete profile URLs. Empty profile fields are not rendered.
+
+Available profiles include Facebook, X, LinkedIn, WhatsApp Channels, Pinterest, Threads, Bluesky, Telegram, Reddit, LINE, Instagram, YouTube, TikTok, GitHub, Mastodon, Snapchat, Twitch, Discord, Patreon, Vimeo, Medium, and Substack. ShareNivo stores these URLs in WordPress and opens them only after a visitor clicks a follow link.
 
 Display follow links with one of these methods:
 
@@ -148,7 +152,7 @@ Open **Advanced** to:
 
 - select public post types;
 - allow automatic output on the front page;
-- add carefully scoped custom CSS;
+- optionally add Open Graph and X card metadata when a common SEO plugin is not active;
 - copy a validated JSON configuration;
 - import a ShareNivo 2.x JSON configuration.
 
@@ -174,7 +178,7 @@ Enable the More button and lower **Maximum visible buttons**, or disable lower-p
 
 ### A theme changes button styling
 
-Test with custom CSS disabled first. If the conflict remains, inspect the theme's global button selectors. ShareNivo prefixes its classes with `sharenivo-` to reduce conflicts.
+Inspect the theme's global button selectors first. ShareNivo prefixes its classes with `sharenivo-` to reduce conflicts.
 
 ### Share counts are unavailable
 
@@ -182,7 +186,7 @@ ShareNivo 2.0 intentionally removed share counts. Counts require external APIs, 
 
 ## Privacy and accessibility
 
-ShareNivo makes no automatic frontend request to a social network. A network is contacted only after a visitor activates its share link. Controls include accessible names, keyboard focus, live copy feedback, dialog semantics, Escape-key handling, and reduced-motion support.
+ShareNivo makes no automatic frontend request to a social network. A share click sends the current page URL and supported share text to the selected network; a follow click opens the profile URL entered by the site owner. These requests happen only after the visitor's deliberate click. Controls include accessible names, keyboard focus, live copy feedback, dialog semantics, Escape-key handling, and reduced-motion support.
 
 ## Uninstall
 

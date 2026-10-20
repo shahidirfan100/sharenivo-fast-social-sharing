@@ -24,16 +24,42 @@
 	}
 
 	function activateTab(tab) {
-		var $button = $('.sharenivo-tabs__button[data-tab="' + tab + '"]');
-		var $panel = $('.sharenivo-panel[data-panel="' + tab + '"]');
+		var $button = $('.sharenivo-tabs__button').filter(function () {
+			return $(this).attr('data-tab') === tab;
+		}).first();
+		var $panel = $('.sharenivo-panel').filter(function () {
+			return $(this).attr('data-panel') === tab;
+		}).first();
 		if (!$button.length || !$panel.length) {
 			return;
 		}
-		$('.sharenivo-tabs__button').removeClass('is-active').attr('aria-selected', 'false');
+		$('.sharenivo-tabs__button').removeClass('is-active').attr('aria-selected', 'false').attr('tabindex', '-1');
 		$('.sharenivo-panel').removeClass('is-active').prop('hidden', true);
-		$button.addClass('is-active').attr('aria-selected', 'true');
+		$button.addClass('is-active').attr('aria-selected', 'true').attr('tabindex', '0');
 		$panel.addClass('is-active').prop('hidden', false);
 		storeTab(tab);
+	}
+
+	function moveTabFocus(event) {
+		var $buttons = $('.sharenivo-tabs__button');
+		var current = $buttons.index(event.currentTarget);
+		var next = current;
+		var direction = document.documentElement.dir === 'rtl' ? -1 : 1;
+
+		if ('Home' === event.key) {
+			next = 0;
+		} else if ('End' === event.key) {
+			next = $buttons.length - 1;
+		} else if ('ArrowRight' === event.key) {
+			next = (current + direction + $buttons.length) % $buttons.length;
+		} else if ('ArrowLeft' === event.key) {
+			next = (current - direction + $buttons.length) % $buttons.length;
+		} else {
+			return;
+		}
+
+		event.preventDefault();
+		$buttons.eq(next).trigger('focus').trigger('click');
 	}
 
 	function selectedNetworks() {
@@ -124,6 +150,13 @@
 
 	$('.sharenivo-tabs__button').on('click', function () {
 		activateTab($(this).data('tab'));
+	}).on('keydown', moveTabFocus);
+	$('.sharenivo-setup-card__button').on('click', function () {
+		var tab = $(this).attr('data-open-tab');
+		activateTab(tab);
+		$('.sharenivo-tabs__button').filter(function () {
+			return $(this).attr('data-tab') === tab;
+		}).trigger('focus');
 	});
 	var storedTab = getStoredTab();
 	if (storedTab) {

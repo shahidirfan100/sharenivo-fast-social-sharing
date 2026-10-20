@@ -1,22 +1,7 @@
-/* ShareNivo admin design system. Fonts are bundled locally; no remote requests. */
-@font-face {
-	font-family: "ShareNivo Instrument Sans";
-	font-style: normal;
-	font-weight: 400;
-	font-display: swap;
-	src: url("../fonts/InstrumentSans-Regular.ttf") format("truetype");
-}
-@font-face {
-	font-family: "ShareNivo Instrument Sans";
-	font-style: normal;
-	font-weight: 700;
-	font-display: swap;
-	src: url("../fonts/InstrumentSans-Bold.ttf") format("truetype");
-}
-
+/* ShareNivo admin design system. System fonts avoid an extra dashboard download. */
 .settings_page_sharenivo #wpcontent { background: #f4f2f0; }
 .sharenivo-admin {
-	--sn-admin-font: "ShareNivo Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	--sn-admin-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 	--sn-space-1: 4px;
 	--sn-space-2: 8px;
 	--sn-space-3: 12px;
@@ -141,9 +126,24 @@
 .sharenivo-metrics > div { min-width: 0; padding: 18px 20px; border: 1px solid var(--sn-admin-border); border-radius: var(--sn-admin-radius-md); background: #fcfaf9; }
 .sharenivo-metrics strong { display: block; color: var(--sn-admin-brand-dark); font-size: 30px; font-weight: 700; line-height: 1.1; }
 .sharenivo-metrics span { display: block; margin-top: var(--sn-space-2); color: var(--sn-admin-muted); font-size: 13px; line-height: 1.4; }
-.sharenivo-feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sn-space-4); }
-.sharenivo-feature-grid > .sharenivo-card { min-width: 0; }
-.sharenivo-card__icon { display: grid; place-items: center; width: 36px; height: 36px; margin-bottom: 16px; border-radius: 10px; background: #ffebe7; color: var(--sn-admin-brand-dark); font-size: 12px; font-weight: 700; }
+.sharenivo-setup-heading { display: flex; align-items: end; justify-content: space-between; gap: var(--sn-space-5); margin: var(--sn-space-6) 0 var(--sn-space-3); }
+.sharenivo-setup-heading h3 { margin: 5px 0 0; color: var(--sn-admin-ink); font-size: 20px; font-weight: 650; letter-spacing: -.02em; line-height: 1.25; }
+.sharenivo-setup-heading > p { max-width: 500px; margin: 0; color: var(--sn-admin-muted); font-size: 13px; line-height: 1.5; }
+.sharenivo-setup-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sn-space-4); }
+.sharenivo-setup-card { display: flex; min-width: 0; flex-direction: column; gap: var(--sn-space-3); padding: var(--sn-space-5); border: 1px solid var(--sn-admin-border); border-radius: var(--sn-admin-radius-md); background: #fff; box-shadow: 0 2px 8px rgba(45, 24, 56, .035); }
+.sharenivo-setup-card.is-ready { border-top: 3px solid var(--sn-admin-brand); padding-top: 17px; }
+.sharenivo-setup-card__top { display: flex; align-items: center; justify-content: space-between; gap: var(--sn-space-2); min-height: 36px; }
+.sharenivo-setup-card__step { display: grid; width: 36px; height: 36px; place-items: center; flex: 0 0 36px; border-radius: 10px; background: #ffebe7; color: var(--sn-admin-brand-dark); font-size: 12px; font-weight: 700; }
+.sharenivo-setup-card__status { max-width: 100%; padding: 5px 9px; border-radius: 999px; background: #f4f2f0; color: #625866; font-size: 11px; font-weight: 650; line-height: 1.3; text-align: right; }
+.sharenivo-setup-card.is-ready .sharenivo-setup-card__status { background: #fff0ed; color: var(--sn-admin-brand-dark); }
+.sharenivo-setup-card h3 { margin: 0; color: var(--sn-admin-ink); font-size: 16px; font-weight: 650; line-height: 1.3; }
+.sharenivo-setup-card p { flex: 1; margin: 0; color: var(--sn-admin-muted); line-height: 1.55; }
+.sharenivo-setup-card__button { display: flex; width: 100%; min-height: 42px; align-items: center; justify-content: space-between; gap: 10px; margin-top: var(--sn-space-1); padding: 0 12px; border: 1px solid #e7d9d7; border-radius: var(--sn-admin-radius-sm); background: #fff; color: var(--sn-admin-brand-dark); cursor: pointer; font: 650 13px/1.2 var(--sn-admin-font); text-align: left; }
+.sharenivo-setup-card__button:hover { border-color: var(--sn-admin-brand); background: #fff5f2; color: var(--sn-admin-brand-dark); }
+.sharenivo-setup-card__button:focus-visible { outline: 3px solid rgba(238, 81, 67, .25); outline-offset: 2px; }
+.sharenivo-setup-card__button span { font-size: 18px; line-height: 1; }
+.sharenivo-tabs__button:focus-visible,
+.sharenivo-panel:focus-visible { outline: 3px solid rgba(238, 81, 67, .24); outline-offset: 2px; }
 
 .sharenivo-toggle { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
 .sharenivo-toggle input { position: absolute; opacity: 0; pointer-events: none; }
@@ -252,8 +252,14 @@
 @keyframes sharenivo-preview-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
 .sharenivo-profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sn-space-3); }
-.sharenivo-profile-grid label { grid-template-columns: 36px minmax(72px, 90px) minmax(0, 1fr); align-items: center; padding: 9px; border: 1px solid var(--sn-admin-border); border-radius: var(--sn-admin-radius-sm); }
-.sharenivo-profile-grid label > span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; background: var(--network-color); color: #fff; }
+.sharenivo-profile-card { display: grid; min-width: 0; gap: var(--sn-space-2); padding: 12px; border: 1px solid var(--sn-admin-border); border-radius: var(--sn-admin-radius-sm); background: #fff; }
+.sharenivo-profile-card__label { display: flex !important; min-width: 0; align-items: center; gap: 10px !important; color: var(--sn-admin-ink) !important; font-size: 13px !important; font-weight: 650 !important; }
+.sharenivo-profile-card__icon { display: grid; width: 34px; height: 34px; place-items: center; flex: 0 0 34px; border-radius: 9px; background: var(--network-color); color: #fff; }
+.sharenivo-profile-card[data-network="snapchat"] .sharenivo-profile-card__icon,
+.sharenivo-profile-card[data-network="patreon"] .sharenivo-profile-card__icon,
+.sharenivo-profile-card[data-network="vimeo"] .sharenivo-profile-card__icon,
+.sharenivo-profile-card[data-network="substack"] .sharenivo-profile-card__icon { color: #171717; }
+.sharenivo-profile-card[data-network="mastodon"] .sharenivo-profile-card__icon { color: #000; }
 .sharenivo-profile-grid svg { width: 18px; height: 18px; fill: currentColor; }
 .sharenivo-portability { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sn-space-5); padding-top: var(--sn-space-5); border-top: 1px solid var(--sn-admin-border); }
 .sharenivo-portability textarea { margin-bottom: var(--sn-space-2); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
@@ -298,9 +304,10 @@
 	.sharenivo-metrics > div { padding: 14px 12px; }
 	.sharenivo-metrics strong { font-size: 26px; }
 	.sharenivo-metrics span { font-size: 12px; }
-	.sharenivo-feature-grid,
-	.sharenivo-profile-grid,
+	.sharenivo-setup-grid,
 	.sharenivo-portability { grid-template-columns: 1fr; }
+	.sharenivo-setup-heading { align-items: flex-start; flex-direction: column; gap: var(--sn-space-2); }
+	.sharenivo-profile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.sharenivo-location-grid { column-count: 1; }
 	.sharenivo-network-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.sharenivo-master-card { align-items: flex-start; flex-direction: column; }
@@ -320,6 +327,12 @@
 	.sharenivo-panel { padding: 20px 14px; }
 	.sharenivo-panel__heading { margin-bottom: 18px; }
 	.sharenivo-panel__heading h2 { font-size: 24px; }
+	.sharenivo-metrics { grid-template-columns: 1fr; gap: 7px; }
+	.sharenivo-metrics > div { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+	.sharenivo-metrics strong { min-width: 28px; font-size: 22px; }
+	.sharenivo-metrics span { margin: 0; }
+	.sharenivo-setup-grid,
+	.sharenivo-profile-grid { grid-template-columns: minmax(0, 1fr); }
 	.sharenivo-location-card,
 	.sharenivo-card { padding: 16px; }
 	.sharenivo-location-card__settings { gap: 12px; }

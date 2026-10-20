@@ -35,6 +35,8 @@ class Networks {
 			'bluesky'   => array( 'label' => __( 'Bluesky', 'sharenivo-fast-social-sharing' ), 'color' => '#1185fe' ),
 			'telegram'  => array( 'label' => __( 'Telegram', 'sharenivo-fast-social-sharing' ), 'color' => '#229ed9' ),
 			'reddit'    => array( 'label' => __( 'Reddit', 'sharenivo-fast-social-sharing' ), 'color' => '#ff4500' ),
+			'line'      => array( 'label' => __( 'LINE', 'sharenivo-fast-social-sharing' ), 'color' => '#00b900' ),
+			'snapchat'  => array( 'label' => __( 'Snapchat', 'sharenivo-fast-social-sharing' ), 'color' => '#fffc00' ),
 			'email'     => array( 'label' => __( 'Email', 'sharenivo-fast-social-sharing' ), 'color' => '#64748b' ),
 			'copy'      => array( 'label' => __( 'Copy link', 'sharenivo-fast-social-sharing' ), 'color' => '#3a1f4f' ),
 		);
@@ -76,12 +78,23 @@ class Networks {
 	 */
 	public static function get_follow_networks() {
 		$networks = self::get_share_networks();
-		unset( $networks['email'], $networks['copy'], $networks['whatsapp'] );
+		unset( $networks['email'], $networks['copy'] );
+		if ( isset( $networks['whatsapp'] ) ) {
+			$networks['whatsapp']['label'] = __( 'WhatsApp Channel', 'sharenivo-fast-social-sharing' );
+		}
 
 		$networks['instagram'] = array( 'label' => __( 'Instagram', 'sharenivo-fast-social-sharing' ), 'color' => '#e1306c' );
 		$networks['youtube']   = array( 'label' => __( 'YouTube', 'sharenivo-fast-social-sharing' ), 'color' => '#ff0000' );
 		$networks['tiktok']    = array( 'label' => __( 'TikTok', 'sharenivo-fast-social-sharing' ), 'color' => '#111111' );
 		$networks['github']    = array( 'label' => __( 'GitHub', 'sharenivo-fast-social-sharing' ), 'color' => '#24292f' );
+		$networks['mastodon']  = array( 'label' => __( 'Mastodon', 'sharenivo-fast-social-sharing' ), 'color' => '#6364ff' );
+		$networks['snapchat']  = array( 'label' => __( 'Snapchat', 'sharenivo-fast-social-sharing' ), 'color' => '#fffc00' );
+		$networks['twitch']    = array( 'label' => __( 'Twitch', 'sharenivo-fast-social-sharing' ), 'color' => '#9146ff' );
+		$networks['discord']   = array( 'label' => __( 'Discord', 'sharenivo-fast-social-sharing' ), 'color' => '#5865f2' );
+		$networks['patreon']   = array( 'label' => __( 'Patreon', 'sharenivo-fast-social-sharing' ), 'color' => '#ff424d' );
+		$networks['vimeo']     = array( 'label' => __( 'Vimeo', 'sharenivo-fast-social-sharing' ), 'color' => '#1ab7ea' );
+		$networks['medium']    = array( 'label' => __( 'Medium', 'sharenivo-fast-social-sharing' ), 'color' => '#111111' );
+		$networks['substack']  = array( 'label' => __( 'Substack', 'sharenivo-fast-social-sharing' ), 'color' => '#ff6719' );
 
 		return $networks;
 	}
@@ -129,6 +142,7 @@ class Networks {
 		$url_encoded   = rawurlencode( esc_url_raw( $url ) );
 		$title_encoded = rawurlencode( wp_strip_all_tags( $title ) );
 		$text          = $text ? $text : $title;
+		$share_text_encoded = rawurlencode( wp_strip_all_tags( $text ) );
 		$text_encoded  = rawurlencode( trim( wp_strip_all_tags( $text ) . ' ' . esc_url_raw( $url ) ) );
 		$x_text        = $x_text ? $x_text : $text;
 		$text_only     = rawurlencode( wp_strip_all_tags( $x_text ) );
@@ -156,6 +170,10 @@ class Networks {
 				return 'https://t.me/share/url?url=' . $url_encoded . '&text=' . $title_encoded;
 			case 'reddit':
 				return 'https://www.reddit.com/submit?url=' . $url_encoded . '&title=' . $title_encoded;
+			case 'line':
+				return 'https://social-plugins.line.me/lineit/share?url=' . $url_encoded . '&text=' . $share_text_encoded;
+			case 'snapchat':
+				return 'https://www.snapchat.com/share?link=' . $url_encoded;
 			case 'email':
 				return 'mailto:?subject=' . $title_encoded . '&body=' . $url_encoded;
 			case 'copy':
@@ -184,12 +202,21 @@ class Networks {
 			'bluesky'   => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 10.8c-1.1-2.1-5.7-6.3-8-7-3.5-1.1-2.2 3.2-1.6 4.4.9 1.9 3.1 3.7 4.6 4.4-2.1 0-4.5-.1-6.3-.5-3.6-.7-1.9 2.4-.4 3.5C4 18.5 9.1 19.3 12 21.1c2.9-1.8 8-2.6 11.7-5.5 1.5-1.1 3.1-4.2-.5-3.5-1.7.4-4.1.5-6.2.5 1.5-.7 3.7-2.5 4.6-4.4.6-1.2 1.9-5.5-1.6-4.4-2.3.7-6.9 4.9-8 7Z"/></svg>',
 			'telegram'  => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21.7 3.4 18.5 20c-.2 1.2-.9 1.5-1.9.9l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9.1-8.2c.4-.4-.1-.6-.6-.2L6 13.8l-4.8-1.5c-1-.3-1.1-1 .2-1.5L20.2 3.5c.9-.3 1.7.2 1.5-.1Z"/></svg>',
 			'reddit'    => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.9 11.2c.1-.3.1-.6.1-.9a2.3 2.3 0 0 0-4.1-1.4c-1.3-.8-2.9-1.3-4.6-1.4l1-3 2.6.6a1.7 1.7 0 1 0 .3-1.2l-3.2-.8c-.3-.1-.6.1-.7.4l-1.3 4c-1.7.1-3.3.6-4.6 1.4a2.3 2.3 0 0 0-4 1.5c0 .3 0 .6.1.8-.3.5-.5 1.1-.5 1.8 0 3.1 4.5 5.7 10 5.7s10-2.6 10-5.7c0-.7-.4-1.3-1.1-1.8ZM7.3 12a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8Zm7.8 4.4c-.8.8-2 1.2-3.1 1.2-1.2 0-2.3-.4-3.2-1.2a.6.6 0 0 1 .8-.9c.7.6 1.5.9 2.4.9.8 0 1.7-.3 2.3-.9a.6.6 0 0 1 .8.9Zm1.6-1.6a1.4 1.4 0 1 1 0-2.8 1.4 1.4 0 0 1 0 2.8Z"/></svg>',
+			'line'      => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" d="M12 2.5c-5.7 0-10.3 3.7-10.3 8.3 0 2.8 1.7 5.3 4.4 6.8l-.9 3.2c-.1.4.3.7.6.5l3.8-2.2c.8.2 1.6.3 2.4.3 5.7 0 10.3-3.7 10.3-8.3S17.7 2.5 12 2.5Z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="11" r="1"/><circle cx="16" cy="11" r="1"/></svg>',
 			'email'     => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 5H4a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 4-8 5-8-5V7l8 5 8-5v2Z"/></svg>',
 			'copy'      => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3Zm2 0h5a2 2 0 0 1 2 2v5h2V5h-9v2Zm5 2H5v10h10V9Z"/></svg>',
 			'instagram' => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm11.5 1.5a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>',
 			'youtube'   => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M23 7.3a3 3 0 0 0-2.1-2.1C19 4.7 12 4.7 12 4.7s-7 0-8.9.5A3 3 0 0 0 1 7.3 31 31 0 0 0 .5 12a31 31 0 0 0 .5 4.7 3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-4.7 31 31 0 0 0-.5-4.7ZM9.7 15.5v-7l6.1 3.5-6.1 3.5Z"/></svg>',
 			'tiktok'    => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16.7 3c.2 1.7 1.2 3.2 2.8 4.1.8.4 1.6.7 2.5.7v3.5a9.4 9.4 0 0 1-5.3-1.7v6.6a6.8 6.8 0 1 1-5.9-6.7v3.6a3.3 3.3 0 1 0 2.4 3.1V3h3.5Z"/></svg>',
 			'github'    => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.9c-2.9.6-3.5-1.2-3.5-1.2-.5-1.2-1.2-1.5-1.2-1.5-1-.7.1-.7.1-.7 1.1.1 1.7 1.1 1.7 1.1 1 1.7 2.6 1.2 3.2.9.1-.7.4-1.2.7-1.5-2.3-.3-4.7-1.2-4.7-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.7s.8-.3 2.8 1a9.5 9.5 0 0 1 5 0c2-1.3 2.8-1 2.8-1a3.6 3.6 0 0 1 .1 2.7 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.7-4.7 5 .4.3.7 1 .7 2V21c0 .3.2.6.7.5A10 10 0 0 0 12 2Z"/></svg>',
+			'mastodon'  => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.2c-3.3 0-6 .3-7.7 1.7C2.7 5.2 2.5 7.2 2.5 11c0 3.8.2 6.7 1.6 8.4 1.6 1.8 4 2.3 6.8 2.5 2 .1 3.8-.1 5.1-.5l-.3-2.9c-1.3.4-2.9.6-4.6.6-2.8 0-4.1-.8-4.3-2.7 2.5.7 5.9.8 8.2.3 3.5-.8 4.4-3.1 4.4-7.1V8.1c0-3.9-2.1-5.9-7.4-5.9ZM8.4 8.1v5.4H5.8V8.1c0-1.2.5-1.8 1.3-1.8.9 0 1.3.7 1.3 1.8Zm4.1 5.4V8.1c0-1.2.5-1.8 1.3-1.8s1.3.7 1.3 1.8v5.4h-2.6Z"/></svg>',
+			'snapchat'  => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.2c-2.7 0-4.6 2.1-4.6 5.2 0 .8.1 1.8.2 2.6-.4.2-1.1.1-1.6-.3-.3-.2-.7-.2-.9.1-.2.3-.1.7.2.9.7.5 1.6.7 2.3.6-.5 1.7-1.6 3-3.3 3.8-.4.2-.5.7-.2 1 .6.7 1.6.8 2.5.9.2 0 .3.2.4.4.1.4.5.6.9.5 1.4-.4 2.7-.1 3.6.9.2.2.6.2.8 0 1-1 2.2-1.3 3.6-.9.4.1.8-.1.9-.5.1-.2.2-.4.4-.4.9-.1 1.9-.2 2.5-.9.3-.3.2-.8-.2-1-1.7-.8-2.8-2.1-3.3-3.8.7.1 1.6-.1 2.3-.6.3-.2.4-.6.2-.9-.2-.3-.6-.3-.9-.1-.5.4-1.2.5-1.6.3.1-.8.2-1.8.2-2.6 0-3.1-1.9-5.2-4.6-5.2Z"/></svg>',
+			'twitch'    => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 2h18v13l-5 5h-4l-3 3H7v-3H3V5l1-3Zm2 2v14h4v3l3-3h4l3-3V4H6Zm4 3h2v6h-2V7Zm6 0h2v6h-2V7Z"/></svg>',
+			'discord'   => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.6 5.1a17 17 0 0 0-4.2-1.3l-.5 1a15.5 15.5 0 0 0-5.8 0l-.5-1a17 17 0 0 0-4.2 1.3C1.8 9 1.1 12.8 1.5 16.5a17 17 0 0 0 5.2 2.6l1.1-1.8-1.7-.8.4-.3c3.3 1.5 6.7 1.5 10 0l.4.3-1.7.8 1.1 1.8a17 17 0 0 0 5.2-2.6c.5-4.3-.8-8-3.9-11.4ZM8.8 14.2c-.8 0-1.4-.7-1.4-1.6S8 11 8.8 11s1.4.7 1.4 1.6-.6 1.6-1.4 1.6Zm6.4 0c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Z"/></svg>',
+			'patreon'   => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 2h3v20H3V2Zm12.5 0a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z"/></svg>',
+			'vimeo'     => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5h5l3 10 4-10h5l-7 15h-4L3 5Z"/></svg>',
+			'medium'    => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 5.2c0-.3-.1-.6-.4-.8L0 2.6V2h7l5.4 11.8L17.1 2H24v.6l-1.4 1.3c-.1.1-.2.3-.2.5v15.2c0 .2.1.4.2.5l1.4 1.3v.6h-7.6v-.6l1.5-1.4c.1-.1.1-.3.1-.5V7.2L13 22h-.6L6.2 7.2v9.9c-.1.4.1.9.4 1.2l2 2.4v.6H3v-.6l2-2.4c.3-.3.4-.8.3-1.2V5.7c0-.3-.1-.6-.3-.8L2 5.2Z"/></svg>',
+			'substack'  => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 3h18v2H3V3Zm0 4h18v2H3V7Zm0 4h18v2H3v-2Zm2 4h14v7l-7-3.6L5 22v-7Zm2 2v1.8l5-2.6 5 2.6V17H7Z"/></svg>',
 			'more'      => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>',
 			'close'     => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z"/></svg>',
 		);

@@ -4,7 +4,7 @@ Tags: social share, share buttons, social media, privacy, lightweight
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,13 +18,13 @@ ShareNivo adds polished social sharing without loading social SDKs, remote fonts
 
 ShareNivo combines six placements and behavior-based prompts in a local, privacy-first engine. Delay, reading progress, inactivity, comment return, exit intent, and WooCommerce confirmation triggers run in the browser without analytics collection or background calls to social networks. Its compact and full-width mobile bars preserve configured shapes and use equal responsive columns without forcing page-level horizontal scrolling.
 
-= ShareNivo 2.1 features =
+= ShareNivo 2.2 features =
 
-* Active browser-sharing options: Facebook, X, LinkedIn, WhatsApp, Pinterest, Threads, Bluesky, Telegram, Reddit, Email, and Copy Link.
+* Active browser-sharing options: Facebook, X, LinkedIn, WhatsApp, Pinterest, Threads, Bluesky, Telegram, Reddit, LINE, Snapchat, Email, and Copy Link.
 * Floating desktop rail, inline buttons, mobile sticky bar, popup, fly-in, and image sharing.
 * Local triggers for delay, scroll depth, reading completion, inactivity, desktop exit intent, comments, and WooCommerce order confirmation.
 * Frequency controls stored in the visitor's browser with no server call.
-* Follow profiles for active social and creator platforms.
+* Follow profiles for Facebook, X, LinkedIn, WhatsApp Channels, Pinterest, Threads, Bluesky, Telegram, Reddit, LINE, Instagram, YouTube, TikTok, GitHub, Mastodon, Snapchat, Twitch, Discord, Patreon, Vimeo, Medium, and Substack.
 * Original ShareNivo deep-plum and vivid-coral design system with network, brand, and minimal color modes.
 * Shape, size, spacing, labels, button order, eight hover choices, and entrance controls.
 * Accessible keyboard navigation, visible focus, dialog semantics, live copy feedback, and reduced-motion support.
@@ -42,7 +42,7 @@ Share counts were removed in 2.0. They require external requests, add latency, a
 
 == External services ==
 
-ShareNivo makes no automatic requests to external services and does not send analytics or visitor data. When a visitor deliberately clicks a share button, their browser opens that network's official sharing page and sends the current page URL and, where supported, its title or selected image. That interaction is governed by the selected network's terms and privacy policy.
+ShareNivo does not contact external services automatically, collect analytics, or send visitor data to ShareNivo servers. When a visitor deliberately clicks a share button, their browser opens the selected network's sharing page and sends the current page URL and, where supported, its title, text, or selected image. A follow button opens the full profile URL entered by the site owner. The destination receives the request only after that click and may receive standard connection data from the visitor's browser. ShareNivo adds no tracking parameters.
 
 Supported destinations and their policies:
 
@@ -55,6 +55,24 @@ Supported destinations and their policies:
 * Bluesky: [Terms](https://bsky.social/about/support/tos), [Privacy Policy](https://bsky.social/about/support/privacy-policy)
 * Telegram: [Terms](https://telegram.org/tos), [Privacy Policy](https://telegram.org/privacy)
 * Reddit: [User Agreement](https://redditinc.com/policies/user-agreement), [Privacy Policy](https://redditinc.com/policies/privacy-policy)
+* LINE: [Terms](https://terms.line.me/line_terms?lang=en_GB), [Privacy Policy](https://line.me/terms/policy/)
+* Snapchat: [Terms](https://www.snap.com/terms?lang=en-US), [Privacy Policy](https://values.snap.com/privacy/privacy-policy)
+
+Follow-only destinations and their policies:
+
+* Instagram: [Terms of Use](https://help.instagram.com/581066165581870), [Meta Privacy Policy](https://privacycenter.instagram.com/policy)
+* YouTube: [Terms of Service](https://www.youtube.com/t/terms), [Google Privacy Policy](https://policies.google.com/privacy)
+* TikTok: [Terms of Service](https://www.tiktok.com/legal/page/us/terms-of-service/en?region=us), [Privacy Policy](https://www.tiktok.com/legal/page/us/privacy-policy/en?appLaunch=app). TikTok provides region-specific policies; the destination may show a different version based on the visitor's location.
+* GitHub: [Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service), [Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement)
+* Mastodon: policies are set by each server. See the selected server's policy links; for example, [mastodon.social Terms](https://mastodon.social/terms-of-service) and [Privacy Policy](https://mastodon.social/privacy-policy).
+* Twitch: [Terms of Service](https://www.twitch.tv/p/terms-of-service), [Privacy Notice](https://legal.twitch.com/en/legal/privacy-notice/)
+* Discord: [Terms of Service](https://discord.com/terms), [Privacy Policy](https://discord.com/privacy)
+* Patreon: [Terms of Use](https://www.patreon.com/policy/legal), [Privacy Policy](https://privacy.patreon.com/)
+* Vimeo: [Terms of Service](https://vimeo.com/legal), [Privacy Policy](https://vimeo.com/legal/privacy)
+* Medium: [Terms of Service](https://help.medium.com/hc/en-us/articles/213481318-Medium-Terms-of-Service), [Privacy Policy](https://help.medium.com/hc/en-us/articles/213481328-Medium-Privacy-Policy)
+* Substack: [Terms of Use](https://substack.com/tos), [Privacy Policy](https://substack.com/privacy)
+
+Profile URLs are entered by the site owner. The browser opens a profile destination only after a visitor clicks a follow button; no social profile URL is fetched or embedded on page load. Each destination's terms and privacy policy apply.
 
 Email uses the visitor's configured mail application. Copy Link stays in the browser.
 
@@ -67,17 +85,18 @@ Email uses the visitor's configured mail application. Copy Link stays in the bro
 
 == Screenshots ==
 
-1. Overview dashboard with active networks, enabled placements, tracking-request status, and the master switch.
+1. Overview dashboard with network and placement counts, guided setup cards, and the master switch.
 2. Current sharing-network selector and deterministic display-order controls.
 3. Placement controls for floating, inline, mobile sticky, popup, fly-in, and image sharing.
 4. Button design, color, motion, labels, spacing, and live-preview controls.
 5. Responsive inline and full-width mobile sticky buttons with equal columns and no horizontal scrolling.
+6. Follow profile settings for current networks, including LINE, Snapchat, and WhatsApp Channels.
 
 == Frequently Asked Questions ==
 
 = Does ShareNivo make frontend API requests? =
 
-No. ShareNivo does not fetch counts, load social SDKs, download fonts, or send analytics. A network is contacted only after a visitor clicks its share link.
+No. ShareNivo does not fetch counts, load social SDKs, download fonts, or send analytics. A network is contacted only after a visitor clicks its share or follow link.
 
 = Why are share counts gone? =
 
@@ -105,6 +124,12 @@ Yes. Legacy settings, the `[sharenova_share]` shortcode, the `sharenova_display_
 Yes. Controls have accessible names and focus states, popup focus is contained, Escape closes transient interfaces, status messages use live regions, and motion is minimized when the operating system requests reduced motion.
 
 == Changelog ==
+
+= 2.2.2 =
+* Added LINE and Snapchat share buttons and ten new follow profile destinations, including WhatsApp Channels.
+* Reworked the settings overview with guided setup, configuration counts, clearer profile URL fields, and keyboard-accessible tabs.
+* Use the WordPress admin system font stack for the dashboard; frontend font behavior is unchanged.
+* Kept sharing, profile settings, and rendering local. Networks are contacted only after a visitor clicks a share or follow link.
 
 = 2.2.1 =
 * Avoid repeated shortcode and block parsing on ordinary frontend post content to reduce unnecessary work.
@@ -162,6 +187,9 @@ Yes. Controls have accessible names and focus states, popup focus is contained, 
 * Preserved ShareNova upgrade compatibility.
 
 == Upgrade Notice ==
+
+= 2.2.2 =
+Adds LINE and Snapchat sharing, ten follow-profile destinations, and setup and accessibility improvements. Existing settings and ShareNivo/ShareNova integrations are preserved.
 
 = 2.2.1 =
 Improves frontend asset detection and hardens post metadata and admin behavior without changing existing settings or compatibility hooks.
